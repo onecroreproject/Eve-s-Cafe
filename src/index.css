@@ -1,0 +1,945 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   EVESCAFE — DEEP BOTANICAL THEME
+   Focused on Natural Skincare Aesthetics
+   ============================================ */
+
+:root,
+[data-theme="botanical"] {
+  --primary: 30 70 50;
+  /* Deep Forest Green */
+  --primary-dark: 20 50 35;
+  --accent: 100 150 120;
+  /* Sage Leaf */
+  --accent-dark: 80 120 100;
+  --background: 255 255 255;
+  /* Pure White */
+  --surface: 248 252 250;
+  /* Minty White Tint */
+  --foreground: 15 30 25;
+  /* Dark Moss */
+  --muted: 90 110 100;
+  /* Grey-Green */
+  --border: 220 235 225;
+  /* Soft Sage Border */
+}
+
+@layer base {
+  body {
+    background-color: rgb(var(--background));
+    color: rgb(var(--foreground));
+    -webkit-font-smoothing: antialiased;
+    font-family: 'Playfair Display', serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
+  }
+}
+
+/* ============================================
+   CORE UTILITIES
+   ============================================ */
+
+/* Primary Action Button */
+.btn-primary {
+  background-color: rgb(var(--primary));
+  color: #fff;
+  border: none;
+  padding: 0.85rem 2rem;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 14px rgb(var(--primary) / 0.15);
+}
+
+.btn-primary:hover {
+  background-color: rgb(var(--primary-dark));
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgb(var(--primary) / 0.25);
+}
+
+/* Apothecary Card Style */
+.card {
+  background-color: rgb(var(--surface));
+  border: 1px solid rgb(var(--border));
+  border-radius: 20px;
+  padding: 2rem;
+  transition: all 0.4s ease;
+}
+
+.card:hover {
+  border-color: rgb(var(--primary) / 0.4);
+  box-shadow: 0 10px 30px rgb(var(--primary) / 0.08);
+}
+
+/* Small Label Badge */
+.badge {
+  background-color: rgb(var(--primary) / 0.08);
+  color: rgb(var(--primary));
+  border: 1px solid rgb(var(--primary) / 0.2);
+  border-radius: 99px;
+  padding: 0.35rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* Subtle Branding Gradient */
+.text-gradient {
+  background: linear-gradient(to right, #D4B28C, #B48253);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline-block;
+  padding-right: 0.05em;
+  margin-right: -0.05em;
+}
+
+.luxury-serif {
+  font-family: 'Playfair Display', serif;
+}
+
+/* ============================================
+   NAVBAR SPECIFIC STYLES
+   ============================================ */
+
+/* Glass morphism navbar */
+.navbar-glass {
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgb(var(--border));
+}
+
+/* Navbar link hover animation */
+.nav-link {
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%) scaleX(0);
+  width: 80%;
+  height: 2px;
+  background: linear-gradient(90deg, rgb(var(--primary)), rgb(var(--accent)));
+  border-radius: 2px;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-link:hover::after {
+  transform: translateX(-50%) scaleX(1);
+}
+
+/* Active nav link */
+.nav-link.active {
+  color: rgb(var(--primary));
+  font-weight: 600;
+}
+
+.nav-link.active::after {
+  transform: translateX(-50%) scaleX(1);
+}
+
+/* Cart badge pulse animation */
+@keyframes cartPulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.cart-badge {
+  animation: cartPulse 0.3s ease-out;
+}
+
+/* ============================================
+   LOGIN OVERLAY STYLES
+   White Background with Green Sidebar
+   ============================================ */
+
+/* Login Modal Container */
+.login-overlay-container {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1300;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* Login Card - Split Layout */
+.login-card {
+  display: flex;
+  width: 100%;
+  max-width: 880px;
+  background-color: #ffffff;
+  border-radius: 32px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: slideUp 0.3s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Green Sidebar - Left Side */
+.login-green-sidebar {
+  width: 35%;
+  background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  color: white;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-green-sidebar::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.login-green-sidebar .botanical-icon {
+  font-size: 56px;
+  margin-bottom: 1.5rem;
+  opacity: 0.9;
+  animation: gentleFloat 3s ease-in-out infinite;
+}
+
+@keyframes gentleFloat {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.login-green-sidebar h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.02em;
+}
+
+.login-green-sidebar p {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  line-height: 1.5;
+}
+
+.login-green-sidebar .leaf-pattern {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  font-size: 80px;
+  opacity: 0.1;
+  transform: rotate(15deg);
+}
+
+/* White Form Section - Right Side */
+.login-white-section {
+  flex: 1;
+  background-color: #ffffff;
+  padding: 2rem 2rem 2rem 2rem;
+  position: relative;
+}
+
+.login-white-section .close-btn {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  color: #9CA3AF;
+  transition: all 0.2s;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 50%;
+}
+
+.login-white-section .close-btn:hover {
+  color: #374151;
+  background-color: #F3F4F6;
+}
+
+.login-white-section h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1B5E20;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.login-white-section .subtitle {
+  color: #6B7280;
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Form Field Styles with Green Focus */
+.login-white-section .form-field {
+  margin-bottom: 1.25rem;
+}
+
+.login-white-section .form-field label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.login-white-section .form-field input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 14px;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+  background-color: #ffffff;
+}
+
+.login-white-section .form-field input:focus {
+  outline: none;
+  border-color: #2E7D32;
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+}
+
+.login-white-section .form-field .input-icon {
+  position: relative;
+}
+
+.login-white-section .form-field .input-icon svg {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9CA3AF;
+  font-size: 1.1rem;
+}
+
+.login-white-section .form-field .input-icon input {
+  padding-left: 2.75rem;
+}
+
+/* Submit Button */
+.login-white-section .submit-btn {
+  width: 100%;
+  background-color: #2E7D32;
+  color: white;
+  border: none;
+  padding: 0.875rem;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.login-white-section .submit-btn:hover {
+  background-color: #1B5E20;
+  transform: translateY(-1px);
+}
+
+.login-white-section .submit-btn:active {
+  transform: translateY(0);
+}
+
+/* Divider */
+.login-white-section .divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.25rem 0;
+}
+
+.login-white-section .divider-line {
+  flex: 1;
+  height: 1px;
+  background-color: #E5E7EB;
+}
+
+.login-white-section .divider-text {
+  font-size: 0.75rem;
+  color: #9CA3AF;
+  text-transform: uppercase;
+}
+
+/* Social Login Buttons */
+.login-white-section .social-buttons {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.login-white-section .social-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.7rem;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 14px;
+  background-color: #ffffff;
+  color: #374151;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.login-white-section .social-btn:hover {
+  border-color: #2E7D32;
+  background-color: rgba(46, 125, 50, 0.04);
+}
+
+.login-white-section .social-btn svg {
+  font-size: 1.1rem;
+}
+
+/* Toggle Link */
+.login-white-section .toggle-auth {
+  text-align: center;
+  font-size: 0.875rem;
+  color: #6B7280;
+}
+
+.login-white-section .toggle-auth button {
+  background: none;
+  border: none;
+  color: #2E7D32;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 0.25rem;
+}
+
+.login-white-section .toggle-auth button:hover {
+  text-decoration: underline;
+}
+
+/* Checkbox Style */
+.login-white-section .checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0.75rem 0 1rem 0;
+}
+
+.login-white-section .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: #4B5563;
+}
+
+.login-white-section .checkbox-label input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #2E7D32;
+  cursor: pointer;
+}
+
+.login-white-section .forgot-link {
+  font-size: 0.875rem;
+  color: #2E7D32;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.login-white-section .forgot-link:hover {
+  text-decoration: underline;
+}
+
+/* ============================================
+   DRAWER / MOBILE MENU STYLES
+   ============================================ */
+
+/* Mobile drawer custom styling */
+.mobile-drawer .MuiDrawer-paper {
+  background: linear-gradient(135deg, #ffffff 0%, rgb(var(--surface)) 100%);
+  border-left: 1px solid rgb(var(--border));
+}
+
+/* Drawer menu item hover */
+.drawer-menu-item {
+  transition: all 0.2s ease;
+  border-radius: 12px;
+  margin: 4px 0;
+}
+
+.drawer-menu-item:hover {
+  background: rgba(var(--primary), 0.06);
+  transform: translateX(4px);
+}
+
+.drawer-menu-item.active {
+  background: rgba(var(--primary), 0.1);
+  color: rgb(var(--primary));
+}
+
+/* ============================================
+   SHOP MEGA MENU STYLES
+   ============================================ */
+
+/* Mega menu container */
+.mega-menu-paper {
+  border-radius: 20px;
+  margin-top: 8px;
+  overflow: hidden;
+  border: 1px solid rgb(var(--border));
+  box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.1);
+}
+
+/* Category item in mega menu */
+.mega-category-item {
+  transition: all 0.2s ease;
+  border-radius: 12px;
+}
+
+.mega-category-item:hover {
+  background: rgba(var(--primary), 0.05);
+  transform: translateX(4px);
+}
+
+.mega-category-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(var(--primary), 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgb(var(--primary));
+  transition: all 0.2s;
+}
+
+.mega-category-item:hover .mega-category-icon {
+  background: rgb(var(--primary));
+  color: white;
+}
+
+/* Promo card in mega menu */
+.mega-promo-card {
+  background: rgb(var(--surface));
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.mega-promo-card:hover {
+  transform: translateY(-4px);
+}
+
+.mega-promo-img {
+  transition: transform 0.5s ease;
+}
+
+.mega-promo-card:hover .mega-promo-img {
+  transform: scale(1.05);
+}
+
+/* ============================================
+   RESPONSIVE UTILITIES
+   ============================================ */
+
+/* Mobile Responsive for Login */
+@media (max-width: 640px) {
+  .login-card {
+    flex-direction: column;
+    max-width: 90%;
+    border-radius: 24px;
+  }
+
+  .login-green-sidebar {
+    width: 100%;
+    padding: 1.5rem;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 1rem;
+    text-align: left;
+  }
+
+  .login-green-sidebar .botanical-icon {
+    font-size: 40px;
+    margin-bottom: 0;
+  }
+
+  .login-green-sidebar .text-content h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .login-green-sidebar .text-content p {
+    font-size: 0.7rem;
+  }
+
+  .login-green-sidebar .leaf-pattern {
+    display: none;
+  }
+
+  .login-white-section {
+    padding: 1.5rem;
+  }
+
+  .login-white-section h2 {
+    font-size: 1.5rem;
+  }
+
+  .social-buttons {
+    flex-wrap: wrap;
+  }
+
+  .social-btn {
+    flex: none;
+    width: calc(33.33% - 0.5rem);
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 641px) and (max-width: 768px) {
+  .login-card {
+    max-width: 700px;
+  }
+
+  .login-green-sidebar {
+    width: 30%;
+    padding: 1.5rem;
+  }
+
+  .login-green-sidebar h3 {
+    font-size: 1.2rem;
+  }
+
+  .login-white-section {
+    padding: 1.5rem;
+  }
+}
+
+/* Animation for form switching */
+.login-form-enter {
+  opacity: 0;
+  transform: translateX(10px);
+}
+
+.login-form-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.login-form-exit {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.login-form-exit-active {
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+/* ============================================
+   ADDITIONAL GREEN OVERLAY COMPONENTS
+   ============================================ */
+
+/* Green overlay for any modal/dialog */
+.green-overlay {
+  background: linear-gradient(135deg, rgba(46, 125, 50, 0.95) 0%, rgba(27, 94, 32, 0.95) 100%);
+  backdrop-filter: blur(8px);
+}
+
+/* White card with green accent border */
+.white-card-green-accent {
+  background: #ffffff;
+  border-radius: 20px;
+  border-left: 4px solid #2E7D32;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s;
+}
+
+.white-card-green-accent:hover {
+  box-shadow: 0 8px 25px rgba(46, 125, 50, 0.12);
+  transform: translateY(-2px);
+}
+
+/* Green dot indicator */
+.green-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #2E7D32;
+  border-radius: 50%;
+  display: inline-block;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.6;
+    transform: scale(1.2);
+  }
+}
+
+/* Green gradient text for highlights */
+.green-gradient-text {
+  background: linear-gradient(135deg, #2E7D32, #4CAF50);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Custom scrollbar for green theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgb(var(--surface));
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--primary));
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--primary-dark));
+}
+
+/* Loading spinner with green color */
+.green-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(46, 125, 50, 0.2);
+  border-top-color: #2E7D32;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Success toast / alert */
+.green-toast {
+  background: #2E7D32;
+  color: white;
+  border-radius: 12px;
+  padding: 0.75rem 1.25rem;
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+  animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Focus ring for accessibility */
+*:focus-visible {
+  outline: 2px solid #2E7D32;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Disabled button state for green buttons */
+.btn-primary:disabled,
+.submit-btn:disabled {
+  background-color: #9CA3AF;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ============================================
+   HERO BANNER ANIMATIONS
+   ============================================ */
+
+@keyframes progress {
+  0% { transform: scaleX(0); }
+  100% { transform: scaleX(1); }
+}
+
+.animate-progress {
+  animation: progress 6s linear forwards;
+}
+
+@layer utilities {
+  .ease-out-expo {
+    transition-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
+  }
+}
+
+/* ============================================
+   PAGE & MENU TRANSITIONS
+   ============================================ */
+
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-fade-in-transition {
+  animation: pageFadeIn 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes menuFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes itemSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.submenu-item-fade {
+  animation: itemSlideIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ============================================
+   STANDARDIZED LUXURY APOTHECARY TYPOGRAPHY
+   ============================================ */
+
+.luxury-title {
+  font-family: 'Playfair Display', serif !important;
+  font-size: 2.25rem !important; /* 36px */
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.01em !important;
+  color: #1A3C2E !important;
+}
+
+.luxury-subtitle {
+  font-family: 'Playfair Display', serif !important;
+  font-size: 1.05rem !important; /* 16.8px */
+  font-weight: 600 !important;
+  letter-spacing: 0.05em !important;
+  color: #B48253 !important;
+  text-transform: uppercase !important;
+}
+
+.luxury-description {
+  font-family: 'Playfair Display', serif !important;
+  font-size: 1.05rem !important; /* 16.8px */
+  font-weight: 400 !important;
+  line-height: 1.8 !important;
+  color: #4B5563 !important;
+}
+
+.luxury-child-description {
+  font-family: 'Playfair Display', serif !important;
+  font-size: 0.88rem !important; /* 14px */
+  font-weight: 400 !important;
+  line-height: 1.6 !important;
+  color: #6B7280 !important;
+}
+
+@media (max-width: 768px) {
+  .luxury-title {
+    font-size: 1.75rem !important; /* 28px */
+  }
+  .luxury-subtitle {
+    font-size: 0.9rem !important;
+  }
+  .luxury-description {
+    font-size: 0.95rem !important;
+  }
+  .luxury-child-description {
+    font-size: 0.8rem !important;
+  }
+}
