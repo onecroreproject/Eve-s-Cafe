@@ -861,6 +861,10 @@ export default function Cart() {
   const [payMethod, setPayMethod] = useState('payu');
   const [errors, setErrors] = useState({});
 
+  const [paypalLoaded, setPaypalLoaded] = useState(false);
+  const [paypalConfig, setPaypalConfig] = useState(null);
+  const [sdkLoading, setSdkLoading] = useState(false);
+
   useEffect(() => {
     const styleEl = document.createElement('style');
     styleEl.textContent = STYLES;
@@ -868,6 +872,8 @@ export default function Cart() {
     loadCart();
     return () => document.head.removeChild(styleEl);
   }, []);
+
+
 
   const loadCart = () => {
     const saved = localStorage.getItem('cartItems');
@@ -958,6 +964,33 @@ export default function Cart() {
     }
   };
 
+  const handleSimulatePayment = async () => {
+    setLoading(true);
+    try {
+      const res = await api.post('/payment/paypal/simulate', {
+        amount: total,
+        firstname: shipData.name,
+        email: shipData.email,
+        phone: shipData.phone,
+        address: shipData.address,
+        city: shipData.city,
+        pincode: shipData.zip,
+        cartItems: enrichedItems
+      });
+
+      if (res.data.success) {
+        navigate(`/thank-you?status=success&txnid=${res.data.paypal_order_id}`);
+      } else {
+        alert(res.data.message || "Simulation failed");
+      }
+    } catch (err) {
+      console.error("Simulation Error:", err);
+      alert("Failed to simulate checkout.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const updateQty = (id, variant_id, delta) => {
     const updated = cartItems.map(i => 
       (i.id === id && i.variant_id === variant_id) 
@@ -1000,6 +1033,154 @@ export default function Cart() {
   const total = subtotal + shipping;
   const shipProgress = Math.min(100, (subtotal / freeShipAt) * 100);
   const remaining = Math.max(0, freeShipAt - subtotal);
+
+  useEffect(() => {
+    if (payMethod === 'paypal' && currentStep === 'payment' && !paypalConfig && !sdkLoading) {
+      const fetchPaypalConfig = async () => {
+        setSdkLoading(true);
+        try {
+          const res = await api.get('/payment/paypal/config');
+          if (res.data.success) {
+            setPaypalConfig(res.data);
+          } else {
+            console.error("Failed to load PayPal config", res.data);
+          }
+        } catch (err) {
+          console.error("Failed to load PayPal config", err);
+        } finally {
+          setSdkLoading(false);
+        }
+      };
+      fetchPaypalConfig();
+    }
+  }, [payMethod, currentStep, paypalConfig, sdkLoading]);
+
+  useEffect(() => {
+    if (paypalConfig && !window.paypal && !paypalLoaded) {
+      let clientId = paypalConfig.client_id || 'test';
+      
+      // If it looks like a placeholder, use 'test'
+      if (
+        paypalConfig.mode === 'sandbox' &&
+        (!clientId ||
+          clientId.includes('your_') ||
+          clientId.includes('abc_') ||
+          clientId.includes('secret') ||
+          clientId === 'AdpL5X_Y5L7cQ-T8c4G8qX7_3u_X8PqL5X_Y5L7cQ-T8c4G8qX7_3u_X8Pq')
+      ) {
+        console.warn("Using PayPal 'test' client-id fallback for sandbox mode");
+        clientId = 'test';
+      }
+
+      const script = document.createElement('script');
+      script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=${paypalConfig.currency || 'USD'}`;
+      script.async = true;
+      
+      const handleLoadSuccess = () => {
+        setPaypalLoaded(true);
+      };
+      
+      const handleLoadFailure = (err) => {
+        console.error("PayPal SDK failed to load with client ID: " + clientId + ". Retrying with 'test'...", err);
+        if (script.parentNode) {
+          script.parentNode.removeChild(script);
+        }
+        
+        if (clientId !== 'test') {
+          const fallbackScript = document.createElement('script');
+          fallbackScript.src = `https://www.paypal.com/sdk/js?client-id=test&currency=${paypalConfig.currency || 'USD'}`;
+          fallbackScript.async = true;
+          fallbackScript.onload = () => {
+            setPaypalLoaded(true);
+          };
+          fallbackScript.onerror = (fallbackErr) => {
+            console.error("PayPal SDK failed to load even with 'test' client-id:", fallbackErr);
+            alert("Failed to load PayPal secure payment gateway. Please choose another payment method.");
+          };
+          document.body.appendChild(fallbackScript);
+        } else {
+          alert("Failed to load PayPal secure payment gateway. Please choose another payment method.");
+        }
+      };
+
+      script.onload = handleLoadSuccess;
+      script.onerror = handleLoadFailure;
+      document.body.appendChild(script);
+    } else if (window.paypal) {
+      setPaypalLoaded(true);
+    }
+  }, [paypalConfig, paypalLoaded]);
+
+  useEffect(() => {
+    let buttonsInstance = null;
+
+    if (paypalLoaded && currentStep === 'payment' && payMethod === 'paypal') {
+      const container = document.getElementById('paypal-button-container');
+      if (container && window.paypal) {
+        container.innerHTML = '';
+        try {
+          buttonsInstance = window.paypal.Buttons({
+            createOrder: async () => {
+              try {
+                const res = await api.post('/payment/paypal/create', {
+                  amount: total,
+                  firstname: shipData.name,
+                  email: shipData.email,
+                  phone: shipData.phone,
+                  address: shipData.address,
+                  city: shipData.city,
+                  pincode: shipData.zip,
+                  cartItems: enrichedItems
+                });
+                if (res.data.success && res.data.paypal_order_id) {
+                  return res.data.paypal_order_id;
+                } else {
+                  alert(res.data.message || "Failed to create order on server");
+                  throw new Error("Order creation failed");
+                }
+              } catch (err) {
+                console.error("PayPal Create Order Error:", err);
+                alert("Could not initialize PayPal transaction. Please try again.");
+                throw err;
+              }
+            },
+            onApprove: async (data, actions) => {
+              try {
+                const res = await api.post('/payment/paypal/capture', {
+                  paypal_order_id: data.orderID
+                });
+                if (res.data.success) {
+                  navigate(`/thank-you?status=success&txnid=${data.orderID}`);
+                } else {
+                  alert(res.data.message || "Payment capture failed");
+                }
+              } catch (err) {
+                console.error("PayPal Capture Error:", err);
+                alert("Payment capture failed. Please contact support.");
+              }
+            },
+            onError: (err) => {
+              console.error("PayPal Button Error:", err);
+              alert("An error occurred with PayPal. Please try another payment method.");
+            },
+            onCancel: () => {
+              console.log("User cancelled PayPal payment");
+            }
+          });
+
+          buttonsInstance.render('#paypal-button-container');
+        } catch (renderError) {
+          console.error("PayPal button rendering error: ", renderError);
+        }
+      }
+    }
+
+    return () => {
+      if (buttonsInstance && buttonsInstance.close) {
+        buttonsInstance.close();
+      }
+    };
+  }, [paypalLoaded, currentStep, payMethod, total, shipData, enrichedItems, navigate]);
 
   if (loading) {
     return (
@@ -1144,6 +1325,7 @@ export default function Cart() {
                 <div style={{ display: 'grid', gap: '16px' }}>
                   {[
                     { id: 'payu', label: 'PayU Money / Secure Pay', icon: '💎', sub: 'Secure online payment' },
+                    { id: 'paypal', label: 'PayPal', icon: '🅿️', sub: 'PayPal account or credit/debit card' },
                     { id: 'card', label: 'Credit / Debit Card', icon: '💳', sub: 'Visa, Mastercard, RuPay' },
                     { id: 'upi', label: 'UPI / PhonePe / GPay', icon: '📱', sub: 'Instant bank transfer' },
                     { id: 'cod', label: 'Cash on Delivery', icon: '💵', sub: 'Pay when you receive' }
@@ -1212,18 +1394,70 @@ export default function Cart() {
                   </div>
                 </div>
 
-                <button className="cta-btn" onClick={handleNextStep}>
-                  <span>
-                    {!localStorage.getItem('token') && currentStep === 'cart' ? 'Login to Proceed' : (
-                      <>
-                        {currentStep === 'cart' && 'Proceed to Delivery'}
-                        {currentStep === 'delivery' && 'Proceed to Payment'}
-                        {currentStep === 'payment' && 'Place Order Ritual'}
-                      </>
-                    )}
-                  </span>
-                  <ArrowRight />
-                </button>
+                {payMethod === 'paypal' && currentStep === 'payment' ? (
+                  <div style={{ marginTop: '10px', minHeight: '150px' }}>
+                    {!paypalLoaded ? (
+                      <p style={{ textAlign: 'center', fontSize: '0.85rem', color: '#999', padding: '20px 0' }}>
+                        Loading PayPal Secure Buttons...
+                      </p>
+                    ) : null}
+                    <div id="paypal-button-container"></div>
+                    
+                    {paypalConfig && (
+                      !paypalConfig.client_id ||
+                      paypalConfig.client_id.includes('your_') ||
+                      paypalConfig.client_id.includes('abc_') ||
+                      paypalConfig.client_id.includes('secret') ||
+                      paypalConfig.client_id === 'AdpL5X_Y5L7cQ-T8c4G8qX7_3u_X8PqL5X_Y5L7cQ-T8c4G8qX7_3u_X8Pq'
+                    ) ? (
+                      <div style={{
+                        marginTop: '24px',
+                        padding: '24px',
+                        border: `1.5px dashed ${A}`,
+                        borderRadius: '16px',
+                        background: '#FFFDF9',
+                        textAlign: 'center',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.01)'
+                      }}>
+                        <p style={{ fontSize: '0.9rem', color: G, fontWeight: '700', marginBottom: '8px', fontFamily: "'Playfair Display', serif" }}>
+                          🛠️ Developer Sandbox Simulator
+                        </p>
+                        <p style={{ fontSize: '0.75rem', color: '#666', lineHeight: '1.6', marginBottom: '20px', fontFamily: "'Playfair Display', serif" }}>
+                          You are using placeholder credentials in your backend <code>.env</code> file. To run the actual PayPal popup window, configure real sandbox keys. Otherwise, you can test EvesCafe's database order, emails, and Shiprocket booking flow immediately by simulating a successful payment.
+                        </p>
+                        <button 
+                          onClick={handleSimulatePayment} 
+                          className="cta-btn" 
+                          style={{ 
+                            margin: '0 auto', 
+                            padding: '12px 24px', 
+                            fontSize: '0.75rem', 
+                            width: 'auto',
+                            background: A,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px'
+                          }}
+                        >
+                          Simulate Successful Payment
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+                ) : (
+                  <button className="cta-btn" onClick={handleNextStep}>
+                    <span>
+                      {!localStorage.getItem('token') && currentStep === 'cart' ? 'Login to Proceed' : (
+                        <>
+                          {currentStep === 'cart' && 'Proceed to Delivery'}
+                          {currentStep === 'delivery' && 'Proceed to Payment'}
+                          {currentStep === 'payment' && 'Place Order Ritual'}
+                        </>
+                      )}
+                    </span>
+                    <ArrowRight />
+                  </button>
+                )}
 
                 <div className="trust-row">
                   <div className="trust-item"><div className="trust-icon">🔒</div><span className="trust-text">SSL Secure</span></div>
@@ -1237,23 +1471,25 @@ export default function Cart() {
       </div>
 
       {/* Mobile Sticky Bar */}
-      <div className="mobile-cta-bar">
-        <div className="m-cta-inner">
-          <div className="m-total-wrap">
-            <span className="m-total-label">Total Ritual</span>
-            <span className="m-total-val">₹ {total.toLocaleString('en-IN')}</span>
+      {!(payMethod === 'paypal' && currentStep === 'payment') && (
+        <div className="mobile-cta-bar">
+          <div className="m-cta-inner">
+            <div className="m-total-wrap">
+              <span className="m-total-label">Total Ritual</span>
+              <span className="m-total-val">₹ {total.toLocaleString('en-IN')}</span>
+            </div>
+            <button className="m-btn" onClick={handleNextStep}>
+              {!localStorage.getItem('token') && currentStep === 'cart' ? 'Login' : (
+                <>
+                  {currentStep === 'cart' && 'Checkout'}
+                  {currentStep === 'delivery' && 'Pay Now'}
+                  {currentStep === 'payment' && 'Confirm'}
+                </>
+              )} <ArrowRight />
+            </button>
           </div>
-          <button className="m-btn" onClick={handleNextStep}>
-            {!localStorage.getItem('token') && currentStep === 'cart' ? 'Login' : (
-              <>
-                {currentStep === 'cart' && 'Checkout'}
-                {currentStep === 'delivery' && 'Pay Now'}
-                {currentStep === 'payment' && 'Confirm'}
-              </>
-            )} <ArrowRight />
-          </button>
         </div>
-      </div>
+      )}
     </div>
   );
 }
