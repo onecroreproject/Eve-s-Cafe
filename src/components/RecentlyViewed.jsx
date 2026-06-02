@@ -66,6 +66,24 @@ const css = `
     font-weight: 700;
     color: ${A};
   }
+
+  /* Skeleton Loading Styles */
+  @keyframes skeletonShimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .skeleton-item {
+    background: linear-gradient(90deg, #f9fafb 25%, #f3f4f6 37%, #f9fafb 63%);
+    background-size: 400% 100%;
+    animation: skeletonShimmer 1.4s ease infinite;
+    border-radius: 4px;
+  }
+  .skeleton-card {
+    display: flex;
+    flex-direction: column;
+    background: transparent;
+    height: 100%;
+  }
 `;
 
 const RecentlyViewed = () => {
@@ -143,10 +161,13 @@ const RecentlyViewed = () => {
         <div className="rv-grid">
           {loading ? (
             [...Array(5)].map((_, i) => (
-              <div key={i} className="animate-pulse">
-                <div className="bg-gray-100 aspect-square mb-4"></div>
-                <div className="bg-gray-100 h-4 w-3/4 mb-2"></div>
-                <div className="bg-gray-100 h-3 w-1/2"></div>
+              <div key={i} className="skeleton-card">
+                {/* Square Image Box Area */}
+                <div className="skeleton-item" style={{ width: '100%', paddingBottom: '100%', marginBottom: '12px', border: '1px solid #f3f4f6' }} />
+                {/* Title Line */}
+                <div className="skeleton-item" style={{ width: '75%', height: '11px', marginBottom: '8px' }} />
+                {/* Price Line */}
+                <div className="skeleton-item" style={{ width: '45%', height: '11px' }} />
               </div>
             ))
           ) : (

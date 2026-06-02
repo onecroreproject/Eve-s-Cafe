@@ -19,7 +19,7 @@ export const blogPosts = [
       <p>In the quiet hours of the dawn, according to Ayurveda, the world is filled with 'Sattva'—purity and calmness. Developing a morning ritual isn't just about skincare; it's about aligning your internal clock with the rhythms of nature.</p>
       
       <h3>The Dinacharya (Daily Routine)</h3>
-      <p>The first step to glowing skin starts before you even reach for a cleanser. <em>Oil Pulling (Gandusha)</em> with warm sesame oil not only detoxifies the mouth but is said to improve skin clarity by removing systemic toxins.</p>
+      <p>The first step to glowing skin starts before you even reach for a cleanser. <span>Oil Pulling (Gandusha)</span> with warm sesame oil not only detoxifies the mouth but is said to improve skin clarity by removing systemic toxins.</p>
       
       <blockquote>"True beauty is a reflection of your internal state of balance (Dosha)."</blockquote>
       

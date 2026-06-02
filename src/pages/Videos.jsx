@@ -130,12 +130,20 @@ const Videos = () => {
             
             <Typography variant="h1" sx={{ 
               fontFamily: FONT_SERIF, 
-              fontWeight: 600, 
+              fontWeight: 700, 
               color: WHITE, 
               fontSize: { xs: '2.5rem', md: 'clamp(2.5rem, 5vw, 4.8rem)' }, 
-              lineHeight: 1.1 
+              lineHeight: 1.1,
+              letterSpacing: '-0.01em'
             }}>
-              Botanical <span style={{ color: A, fontStyle: 'italic', fontWeight: 400, marginLeft: '0.2em', display: 'inline-block' }}>Journeys</span>
+              Botanical{' '}
+              <span style={{
+                marginLeft: '0.2em',
+                display: 'inline-block',
+                background: 'linear-gradient(to right, #D4B28C, #B48253)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}>Journeys</span>
             </Typography>
             
             <Typography sx={{ 
@@ -355,7 +363,7 @@ const Videos = () => {
           </Grid>
         ) : (
           <Box sx={{ textAlign: 'center', py: 10 }}>
-            <Typography sx={{ color: '#999', fontStyle: 'italic', fontSize: '1rem' }}>
+            <Typography sx={{ color: '#999', fontSize: '1rem' }}>
               No visual rituals found in this category yet.
             </Typography>
           </Box>

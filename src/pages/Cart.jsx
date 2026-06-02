@@ -21,7 +21,6 @@ const STYLES = `
     min-height: 100vh;
     color: ${BLACK};
     position: relative;
-    overflow-x: hidden;
   }
 
   .cart-inner { position: relative; z-index: 1; max-width: 1340px; margin: 0 auto; padding: 0 32px; }
@@ -145,7 +144,7 @@ const STYLES = `
   }
   
   .cart-title em {
-    font-style: italic;
+    font-style: normal;
     color: ${A};
   }
   
@@ -357,6 +356,7 @@ const STYLES = `
     top: 32px;
     border: 1px solid #f0f0f0;
     box-shadow: 0 40px 100px rgba(0,0,0,0.05);
+    align-self: start;
   }
 
   .summary-top {
@@ -821,6 +821,170 @@ const STYLES = `
     font-family: 'Playfair Display', serif;
   }
   .m-btn:hover { background: ${A}; }
+
+  /* Saved Address Cards */
+  .address-cards-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+    grid-column: 1 / -1;
+  }
+  
+  @media (min-width: 600px) {
+    .address-cards-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .address-card {
+    background: ${WHITE};
+    border: 2px solid #f0f0f0;
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    gap: 16px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s;
+    text-align: left;
+  }
+  
+  .address-card:hover {
+    border-color: ${G};
+    background: ${SAGE};
+  }
+  
+  .address-card.selected {
+    border-color: ${G};
+    background: ${SAGE};
+  }
+
+  .address-card.default-border {
+    border-color: ${G}80;
+  }
+
+  .address-card.selected.default-border {
+    border-color: ${G};
+  }
+  
+  .address-card-radio {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+  }
+  
+  .address-card-radio.selected {
+    border-color: ${G};
+  }
+  
+  .address-card-radio.selected::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: ${G};
+  }
+  
+  .address-card-content {
+    flex: 1;
+  }
+  
+  .address-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  
+  .address-card-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: ${BLACK};
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .address-card-badge {
+    background: ${G};
+    color: ${WHITE};
+    font-size: 0.6rem;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-family: 'Playfair Display', serif;
+  }
+  
+  .address-card-text {
+    font-size: 0.82rem;
+    color: #555;
+    line-height: 1.5;
+    margin-bottom: 4px;
+  }
+  
+  .address-card-phone {
+    font-size: 0.72rem;
+    color: #888;
+    font-weight: 600;
+  }
+
+  .address-form-toggle-btn {
+    background: none;
+    border: 2px dashed #d0d0d0;
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    cursor: pointer;
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #666;
+    transition: all 0.2s;
+    width: 100%;
+    margin-bottom: 24px;
+    grid-column: 1 / -1;
+  }
+  
+  .address-form-toggle-btn:hover {
+    border-color: ${G};
+    color: ${G};
+    background: ${SAGE};
+  }
+
+  .address-checkbox-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    grid-column: 1 / -1;
+    margin-top: 8px;
+    text-align: left;
+  }
+
+  .address-checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: ${G};
+    cursor: pointer;
+  }
+
+  .address-checkbox-label {
+    font-size: 0.8rem;
+    color: #444;
+    cursor: pointer;
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+  }
 `;
 
 // ── Icon SVGs ──────────────────────────────────────────────────
@@ -855,7 +1019,7 @@ export default function Cart() {
   const [loading, setLoading] = useState(true);
 
   const [shipData, setShipData] = useState({
-    name: '', email: '', phone: '', address: '', city: '', zip: ''
+    name: '', email: '', phone: '', address: '', city: '', zip: '', address_id: null
   });
 
   const [payMethod, setPayMethod] = useState('payu');
@@ -864,6 +1028,15 @@ export default function Cart() {
   const [paypalLoaded, setPaypalLoaded] = useState(false);
   const [paypalConfig, setPaypalConfig] = useState(null);
   const [sdkLoading, setSdkLoading] = useState(false);
+
+  // Address selection state additions
+  const [savedAddresses, setSavedAddresses] = useState([]);
+  const [selectedAddressId, setSelectedAddressId] = useState(null);
+  const [showNewAddressForm, setShowNewAddressForm] = useState(false);
+  const [newAddress, setNewAddress] = useState({
+    type: 'Home', street: '', landmark: '', city: '', state: '', pincode: '', phone: '', alternate_phone: '', is_default: false, save_future: true
+  });
+  const [addressErrors, setAddressErrors] = useState({});
 
   useEffect(() => {
     const styleEl = document.createElement('style');
@@ -900,20 +1073,105 @@ export default function Cart() {
     }
   };
 
+  const loadSavedAddresses = async () => {
+    try {
+      const res = await api.get('/addresses');
+      if (res.data.status === 'success') {
+        const list = res.data.data;
+        setSavedAddresses(list);
+        
+        if (list.length > 0) {
+          const defaultAddr = list.find(a => a.is_default);
+          if (defaultAddr) {
+            setSelectedAddressId(defaultAddr.id);
+            setShipData(prev => ({
+              ...prev,
+              phone: defaultAddr.phone || prev.phone,
+              address: defaultAddr.address,
+              city: defaultAddr.city,
+              zip: defaultAddr.pincode,
+              address_id: defaultAddr.id
+            }));
+          } else {
+            setSelectedAddressId(list[0].id);
+            setShipData(prev => ({
+              ...prev,
+              phone: list[0].phone || prev.phone,
+              address: list[0].address,
+              city: list[0].city,
+              zip: list[0].pincode,
+              address_id: list[0].id
+            }));
+          }
+          setShowNewAddressForm(false);
+        } else {
+          setShowNewAddressForm(true);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to load saved addresses:", err);
+      setShowNewAddressForm(true);
+    }
+  };
+
+  const handleSelectAddress = (addr) => {
+    setSelectedAddressId(addr.id);
+    setShipData(prev => ({
+      ...prev,
+      phone: addr.phone || prev.phone,
+      address: addr.address,
+      city: addr.city,
+      zip: addr.pincode,
+      address_id: addr.id
+    }));
+  };
+
   const validateDelivery = () => {
     let newErrors = {};
+    let newAddrErrors = {};
+    
     if (!shipData.name.trim()) newErrors.name = 'Full name is required';
     if (!shipData.email.trim()) newErrors.email = 'Email is required';
     else if (!/\S+@\S+\.\S+/.test(shipData.email)) newErrors.email = 'Invalid email format';
-    if (!shipData.phone.trim()) newErrors.phone = 'Phone number is required';
-    if (!shipData.address.trim()) newErrors.address = 'Shipping address is required';
-    if (!shipData.city.trim()) newErrors.city = 'City is required';
-    if (!shipData.zip.trim()) newErrors.zip = 'Pincode is required';
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+
+    if (showNewAddressForm) {
+      if (!newAddress.street || !newAddress.street.trim()) newAddrErrors.street = 'Street address is required';
+      if (!newAddress.city || !newAddress.city.trim()) newAddrErrors.city = 'City is required';
+      if (!newAddress.state || !newAddress.state.trim()) newAddrErrors.state = 'State is required';
+      
+      if (!newAddress.pincode || !newAddress.pincode.trim()) {
+        newAddrErrors.pincode = 'Pincode is required';
+      } else if (!/^\d{6}$/.test(newAddress.pincode.trim())) {
+        newAddrErrors.pincode = 'Pincode must be a valid 6-digit number';
+      }
+      
+      if (!newAddress.phone || !newAddress.phone.trim()) {
+        newAddrErrors.phone = 'Phone number is required';
+      } else if (!/^\d{10}$/.test(newAddress.phone.trim())) {
+        newAddrErrors.phone = 'Phone must be a valid 10-digit number';
+      }
+      
+      if (newAddress.alternate_phone && newAddress.alternate_phone.trim() && !/^\d{10}$/.test(newAddress.alternate_phone.trim())) {
+        newAddrErrors.alternate_phone = 'Alternate phone must be a 10-digit number';
+      }
+      
+      setErrors(newErrors);
+      setAddressErrors(newAddrErrors);
+      return Object.keys(newErrors).length === 0 && Object.keys(newAddrErrors).length === 0;
+    } else {
+      if (!selectedAddressId) {
+        newErrors.selectedAddress = 'Please select a saved shipping address';
+      }
+      if (!shipData.phone || !shipData.phone.trim()) {
+        newErrors.phone = 'Phone number is required';
+      }
+      setErrors(newErrors);
+      setAddressErrors({});
+      return Object.keys(newErrors).length === 0;
+    }
   };
 
-  const handleNextStep = () => {
+  const handleNextStep = async () => {
     const token = localStorage.getItem('token');
     if (!token) {
       window.dispatchEvent(new CustomEvent('open-login-modal', { detail: { mode: 'login' } }));
@@ -922,8 +1180,63 @@ export default function Cart() {
 
     if (currentStep === 'cart') {
       setCurrentStep('delivery');
+      loadSavedAddresses();
     } else if (currentStep === 'delivery') {
-      if (validateDelivery()) setCurrentStep('payment');
+      if (validateDelivery()) {
+        setLoading(true);
+        try {
+          if (showNewAddressForm) {
+            const combinedAddress = [
+              newAddress.street,
+              newAddress.landmark,
+              newAddress.city,
+              newAddress.state,
+              newAddress.pincode
+            ].filter(part => part && part.trim() !== '').join(', ');
+
+            let addressId = null;
+
+            if (newAddress.save_future) {
+              const res = await api.post('/addresses', {
+                type: newAddress.type,
+                address_type: newAddress.type,
+                address: combinedAddress,
+                street: newAddress.street,
+                landmark: newAddress.landmark,
+                city: newAddress.city,
+                state: newAddress.state,
+                pincode: newAddress.pincode,
+                phone: newAddress.phone,
+                alternate_phone: newAddress.alternate_phone,
+                is_default: newAddress.is_default
+              });
+              if (res.data.status === 'success') {
+                addressId = res.data.data.id;
+              }
+            }
+
+            setShipData(prev => ({
+              ...prev,
+              phone: newAddress.phone,
+              address: combinedAddress,
+              city: newAddress.city,
+              zip: newAddress.pincode,
+              address_id: addressId
+            }));
+          } else {
+            setShipData(prev => ({
+              ...prev,
+              address_id: selectedAddressId
+            }));
+          }
+          setCurrentStep('payment');
+        } catch (err) {
+          console.error("Fulfillment address setup failed:", err);
+          alert("Failed to setup delivery address. Please try again.");
+        } finally {
+          setLoading(false);
+        }
+      }
     } else if (currentStep === 'payment') {
       if (payMethod === 'payu') initiatePayUPayment();
       else alert('Order Placed Successfully!');
@@ -941,7 +1254,8 @@ export default function Cart() {
       const res = await api.post('/payment/hash', {
         txnid, amount, productinfo, firstname, email,
         phone: shipData.phone, address: shipData.address,
-        city: shipData.city, pincode: shipData.zip, cartItems: enrichedItems
+        city: shipData.city, pincode: shipData.zip, cartItems: enrichedItems,
+        address_id: shipData.address_id
       });
 
       if (res.data.success) {
@@ -975,7 +1289,8 @@ export default function Cart() {
         address: shipData.address,
         city: shipData.city,
         pincode: shipData.zip,
-        cartItems: enrichedItems
+        cartItems: enrichedItems,
+        address_id: shipData.address_id
       });
 
       if (res.data.success) {
@@ -1130,7 +1445,8 @@ export default function Cart() {
                   address: shipData.address,
                   city: shipData.city,
                   pincode: shipData.zip,
-                  cartItems: enrichedItems
+                  cartItems: enrichedItems,
+                  address_id: shipData.address_id
                 });
                 if (res.data.success && res.data.paypal_order_id) {
                   return res.data.paypal_order_id;
@@ -1279,35 +1595,261 @@ export default function Cart() {
 
                 <div className="delivery-form">
                   <div className="delivery-field-full">
+                    <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.2rem', color: G, borderBottom: '1px solid #f0f0f0', paddingBottom: '8px', marginBottom: '8px' }}>
+                      Recipient Details
+                    </h3>
+                  </div>
+
+                  <div className="delivery-field-full">
                     <label className="delivery-label">Full Name</label>
                     <input className="delivery-input" placeholder="Enter your name" value={shipData.name} onChange={e => {setShipData({...shipData, name: e.target.value}); setErrors({...errors, name: ''})}} style={{borderColor: errors.name ? RED : '#e0e0e0'}} />
                     {errors.name && <p className="delivery-error">{errors.name}</p>}
                   </div>
-                  <div>
+                  
+                  <div className="delivery-field-full">
                     <label className="delivery-label">Email Address</label>
                     <input className="delivery-input" placeholder="email@example.com" value={shipData.email} onChange={e => {setShipData({...shipData, email: e.target.value}); setErrors({...errors, email: ''})}} style={{borderColor: errors.email ? RED : '#e0e0e0'}} />
                     {errors.email && <p className="delivery-error">{errors.email}</p>}
                   </div>
-                  <div>
-                    <label className="delivery-label">Phone Number</label>
-                    <input className="delivery-input" placeholder="+91" value={shipData.phone} onChange={e => {setShipData({...shipData, phone: e.target.value}); setErrors({...errors, phone: ''})}} style={{borderColor: errors.phone ? RED : '#e0e0e0'}} />
-                    {errors.phone && <p className="delivery-error">{errors.phone}</p>}
+
+                  <div className="delivery-field-full" style={{ marginTop: '16px' }}>
+                    <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.2rem', color: G, borderBottom: '1px solid #f0f0f0', paddingBottom: '8px', marginBottom: '8px' }}>
+                      Shipping Address
+                    </h3>
                   </div>
-                  <div className="delivery-field-full">
-                    <label className="delivery-label">Shipping Address</label>
-                    <textarea className="delivery-textarea" placeholder="Street, Building, Landmark..." value={shipData.address} onChange={e => {setShipData({...shipData, address: e.target.value}); setErrors({...errors, address: ''})}} style={{borderColor: errors.address ? RED : '#e0e0e0'}} />
-                    {errors.address && <p className="delivery-error">{errors.address}</p>}
-                  </div>
-                  <div>
-                    <label className="delivery-label">City</label>
-                    <input className="delivery-input" placeholder="Your City" value={shipData.city} onChange={e => {setShipData({...shipData, city: e.target.value}); setErrors({...errors, city: ''})}} style={{borderColor: errors.city ? RED : '#e0e0e0'}} />
-                    {errors.city && <p className="delivery-error">{errors.city}</p>}
-                  </div>
-                  <div>
-                    <label className="delivery-label">Pincode</label>
-                    <input className="delivery-input" placeholder="600000" value={shipData.zip} onChange={e => {setShipData({...shipData, zip: e.target.value}); setErrors({...errors, zip: ''})}} style={{borderColor: errors.zip ? RED : '#e0e0e0'}} />
-                    {errors.zip && <p className="delivery-error">{errors.zip}</p>}
-                  </div>
+
+                  {savedAddresses.length > 0 && (
+                    <div className="delivery-field-full">
+                      <div className="address-cards-grid">
+                        {savedAddresses.map(addr => {
+                          const isSelected = selectedAddressId === addr.id;
+                          return (
+                            <div
+                              key={addr.id}
+                              onClick={() => handleSelectAddress(addr)}
+                              className={`address-card ${isSelected ? 'selected' : ''} ${addr.is_default ? 'default-border' : ''}`}
+                            >
+                              <div className={`address-card-radio ${isSelected ? 'selected' : ''}`} />
+                              <div className="address-card-content">
+                                <div className="address-card-header">
+                                  <span className="address-card-title">
+                                    {addr.type || 'Address'}
+                                    {addr.is_default && <span className="address-card-badge">Default</span>}
+                                  </span>
+                                </div>
+                                <p className="address-card-text">{addr.address}</p>
+                                {addr.phone && <p className="address-card-phone">📞 {addr.phone}</p>}
+                                {addr.alternate_phone && <p className="address-card-phone">📞 {addr.alternate_phone} (Alt)</p>}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {errors.selectedAddress && <p className="delivery-error" style={{ marginBottom: '16px' }}>{errors.selectedAddress}</p>}
+                    </div>
+                  )}
+
+                  {savedAddresses.length > 0 && (
+                    <div className="delivery-field-full">
+                      {!showNewAddressForm ? (
+                        <button
+                          type="button"
+                          className="address-form-toggle-btn"
+                          onClick={() => {
+                            setShowNewAddressForm(true);
+                            setSelectedAddressId(null);
+                          }}
+                        >
+                          <Plus /> Add New Address
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="address-form-toggle-btn"
+                          onClick={() => {
+                            setShowNewAddressForm(false);
+                            if (savedAddresses.length > 0) {
+                              const def = savedAddresses.find(a => a.is_default) || savedAddresses[0];
+                              handleSelectAddress(def);
+                            }
+                          }}
+                        >
+                          Use a Saved Address
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {showNewAddressForm && (
+                    <div className="delivery-form" style={{ gridColumn: '1 / -1', border: `1px solid ${G}15`, background: `${SAGE}30`, padding: '24px', borderRadius: '16px', gap: '20px' }}>
+                      <div className="delivery-field-full" style={{ marginBottom: '8px' }}>
+                        <label className="delivery-label">Address Type</label>
+                        <div style={{ display: 'flex', gap: '12px' }}>
+                          {['Home', 'Work', 'Other'].map(t => (
+                            <button
+                              key={t}
+                              type="button"
+                              onClick={() => setNewAddress({ ...newAddress, type: t })}
+                              style={{
+                                padding: '8px 20px',
+                                borderRadius: '20px',
+                                fontFamily: "'Playfair Display', serif",
+                                fontSize: '0.8rem',
+                                fontWeight: '700',
+                                textTransform: 'uppercase',
+                                border: `1.5px solid ${newAddress.type === t ? G : '#e0e0e0'}`,
+                                background: newAddress.type === t ? G : WHITE,
+                                color: newAddress.type === t ? WHITE : '#666',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                              }}
+                            >
+                              {t}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="delivery-field-full">
+                        <label className="delivery-label">Street Address</label>
+                        <input
+                          className="delivery-input"
+                          placeholder="Flat, House no., Building, Company, Apartment, Street"
+                          value={newAddress.street}
+                          onChange={e => {
+                            setNewAddress({ ...newAddress, street: e.target.value });
+                            setAddressErrors({ ...addressErrors, street: '' });
+                          }}
+                          style={{ borderColor: addressErrors.street ? RED : '#e0e0e0' }}
+                        />
+                        {addressErrors.street && <p className="delivery-error">{addressErrors.street}</p>}
+                      </div>
+
+                      <div className="delivery-field-full">
+                        <label className="delivery-label">Landmark (Optional)</label>
+                        <input
+                          className="delivery-input"
+                          placeholder="e.g. Near Apollo Hospital, Opp. Central Mall"
+                          value={newAddress.landmark}
+                          onChange={e => {
+                            setNewAddress({ ...newAddress, landmark: e.target.value });
+                          }}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="delivery-label">City</label>
+                        <input
+                          className="delivery-input"
+                          placeholder="Your City"
+                          value={newAddress.city}
+                          onChange={e => {
+                            setNewAddress({ ...newAddress, city: e.target.value });
+                            setAddressErrors({ ...addressErrors, city: '' });
+                          }}
+                          style={{ borderColor: addressErrors.city ? RED : '#e0e0e0' }}
+                        />
+                        {addressErrors.city && <p className="delivery-error">{addressErrors.city}</p>}
+                      </div>
+
+                      <div>
+                        <label className="delivery-label">State</label>
+                        <input
+                          className="delivery-input"
+                          placeholder="Your State"
+                          value={newAddress.state}
+                          onChange={e => {
+                            setNewAddress({ ...newAddress, state: e.target.value });
+                            setAddressErrors({ ...addressErrors, state: '' });
+                          }}
+                          style={{ borderColor: addressErrors.state ? RED : '#e0e0e0' }}
+                        />
+                        {addressErrors.state && <p className="delivery-error">{addressErrors.state}</p>}
+                      </div>
+
+                      <div>
+                        <label className="delivery-label">Pincode</label>
+                        <input
+                          className="delivery-input"
+                          placeholder="6-digit PIN code"
+                          value={newAddress.pincode}
+                          onChange={e => {
+                            const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+                            setNewAddress({ ...newAddress, pincode: val });
+                            setAddressErrors({ ...addressErrors, pincode: '' });
+                          }}
+                          style={{ borderColor: addressErrors.pincode ? RED : '#e0e0e0' }}
+                        />
+                        {addressErrors.pincode && <p className="delivery-error">{addressErrors.pincode}</p>}
+                      </div>
+
+                      <div>
+                        <label className="delivery-label">Phone Number</label>
+                        <input
+                          className="delivery-input"
+                          placeholder="10-digit mobile number"
+                          value={newAddress.phone}
+                          onChange={e => {
+                            const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                            setNewAddress({ ...newAddress, phone: val });
+                            setAddressErrors({ ...addressErrors, phone: '' });
+                          }}
+                          style={{ borderColor: addressErrors.phone ? RED : '#e0e0e0' }}
+                        />
+                        {addressErrors.phone && <p className="delivery-error">{addressErrors.phone}</p>}
+                      </div>
+
+                      <div className="delivery-field-full">
+                        <label className="delivery-label">Alternate Phone (Optional)</label>
+                        <input
+                          className="delivery-input"
+                          placeholder="Optional 10-digit number"
+                          value={newAddress.alternate_phone}
+                          onChange={e => {
+                            const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                            setNewAddress({ ...newAddress, alternate_phone: val });
+                            setAddressErrors({ ...addressErrors, alternate_phone: '' });
+                          }}
+                          style={{ borderColor: addressErrors.alternate_phone ? RED : '#e0e0e0' }}
+                        />
+                        {addressErrors.alternate_phone && <p className="delivery-error">{addressErrors.alternate_phone}</p>}
+                      </div>
+
+                      <div className="address-checkbox-wrap">
+                        <input
+                          type="checkbox"
+                          id="save_future"
+                          className="address-checkbox"
+                          checked={newAddress.save_future}
+                          onChange={e => setNewAddress({ ...newAddress, save_future: e.target.checked })}
+                        />
+                        <label htmlFor="save_future" className="address-checkbox-label">
+                          Save this address for future use
+                        </label>
+                      </div>
+
+                      {newAddress.save_future && (
+                        <div className="address-checkbox-wrap" style={{ marginTop: '0px' }}>
+                          <input
+                            type="checkbox"
+                            id="is_default"
+                            className="address-checkbox"
+                            checked={newAddress.is_default}
+                            onChange={e => setNewAddress({ ...newAddress, is_default: e.target.checked })}
+                          />
+                          <label htmlFor="is_default" className="address-checkbox-label">
+                            Set as default address
+                          </label>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {!showNewAddressForm && savedAddresses.length === 0 && (
+                    <div className="delivery-field-full" style={{ textAlign: 'center', padding: '24px', border: '1px dashed #e0e0e0', borderRadius: '16px', background: SAGE }}>
+                      <p style={{ fontFamily: "'Playfair Display', serif", color: '#666', fontSize: '0.9rem' }}>Loading addresses...</p>
+                    </div>
+                  )}
                 </div>
 
                 <button className="back-btn" onClick={() => setCurrentStep('cart')}><ArrowLeft /> Back to Collection</button>
@@ -1347,9 +1889,8 @@ export default function Cart() {
           </div>
 
           {/* RIGHT: Summary Panel */}
-          <div>
-            <div className="summary-panel">
-              <div className="summary-top">
+          <div className="summary-panel">
+            <div className="summary-top">
                 <span className="summary-top-title">Order Summary</span>
                 <span className="summary-badge">Secure Checkout</span>
               </div>
@@ -1466,7 +2007,6 @@ export default function Cart() {
                 </div>
               </div>
             </div>
-          </div>
         </div>
       </div>
 

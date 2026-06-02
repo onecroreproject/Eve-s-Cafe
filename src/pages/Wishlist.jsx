@@ -8,6 +8,31 @@ import {
     Favorite as FavoriteIcon 
 } from '@mui/icons-material';
 
+const skeletonCss = `
+  @keyframes skeletonShimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  
+  .skeleton-item {
+    background: linear-gradient(90deg, #f9fafb 25%, #f3f4f6 37%, #f9fafb 63%);
+    background-size: 400% 100%;
+    animation: skeletonShimmer 1.4s ease infinite;
+    border-radius: 4px;
+  }
+  
+  .skeleton-card {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    overflow: hidden;
+    height: 100%;
+    border: 1px solid #e4dfd4;
+    border-radius: 12px;
+    padding: 0;
+  }
+`;
+
 const Wishlist = () => {
     const navigate = useNavigate();
     const [products, setProducts] = useState([]);
@@ -57,13 +82,27 @@ const Wishlist = () => {
     if (loading) {
         return (
             <Container maxWidth="lg" sx={{ py: 10 }}>
-                <Typography variant="h4" sx={{ mb: 4, fontFamily: 'Playfair Display', fontWeight: 700 }}>My Wishlist</Typography>
-                <Grid container spacing={3}>
+                <style>{skeletonCss}</style>
+                <Typography variant="h4" sx={{ mb: 4, fontFamily: 'Playfair Display', fontWeight: 700, color: '#1A3C2E' }}>My Wishlist</Typography>
+                <Grid container spacing={4}>
                     {[1, 2, 3].map((i) => (
                         <Grid item xs={12} sm={6} md={4} key={i}>
-                            <Skeleton variant="rectangular" height={300} sx={{ borderRadius: 4 }} />
-                            <Skeleton variant="text" sx={{ mt: 2 }} />
-                            <Skeleton variant="text" width="60%" />
+                            <div className="skeleton-card" style={{ height: '100%', minHeight: '400px' }}>
+                                {/* Image Area */}
+                                <div className="skeleton-item" style={{ width: '100%', height: '280px', borderRadius: '12px 12px 0 0' }} />
+                                {/* Content Area */}
+                                <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', flex: 1, gap: '12px' }}>
+                                    {/* Category */}
+                                    <div className="skeleton-item" style={{ width: '35%', height: '10px' }} />
+                                    {/* Name */}
+                                    <div className="skeleton-item" style={{ width: '85%', height: '14px' }} />
+                                    <div className="skeleton-item" style={{ width: '55%', height: '14px', marginBottom: '6px' }} />
+                                    {/* Price */}
+                                    <div className="skeleton-item" style={{ width: '40%', height: '18px', marginBottom: '12px' }} />
+                                    {/* Button */}
+                                    <div className="skeleton-item" style={{ width: '100%', height: '38px', borderRadius: '8px' }} />
+                                </div>
+                            </div>
                         </Grid>
                     ))}
                 </Grid>

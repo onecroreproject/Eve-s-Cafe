@@ -735,7 +735,7 @@ const Navbar = () => {
                         }}
                       >
                         Dazzling Solution <br />
-                        <span style={{ fontStyle: 'italic' }}>With Natural Touch</span>
+                        <span>With Natural Touch</span>
                       </Typography>
                       <Button
                         component={Link}
@@ -969,7 +969,7 @@ const Navbar = () => {
                 }}
               >
                 Experience the <br />
-                <span style={{ color: GREEN, fontStyle: 'italic' }}>Ancient Wisdom</span>
+                <span style={{ color: GREEN }}>Ancient Wisdom</span>
               </Typography>
               <Box
                 sx={{

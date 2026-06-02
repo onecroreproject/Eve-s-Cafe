@@ -83,6 +83,27 @@ const getAddressIcon = (type) => {
 const formatPrice = (price) =>
     new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(price);
 
+const parseAddressString = (fullAddress) => {
+    if (!fullAddress) return { street: '', city: '', state: '', pincode: '' };
+    
+    // Split by commas
+    const parts = fullAddress.split(',').map(part => part.trim());
+    
+    if (parts.length >= 4) {
+        const pincode = parts[parts.length - 1];
+        const state = parts[parts.length - 2];
+        const city = parts[parts.length - 3];
+        const street = parts.slice(0, parts.length - 3).join(', ');
+        return { street, city, state, pincode };
+    } else if (parts.length === 3) {
+        return { street: parts[0], city: parts[1], state: '', pincode: parts[2] };
+    } else if (parts.length === 2) {
+        return { street: parts[0], city: '', state: '', pincode: parts[1] };
+    } else {
+        return { street: fullAddress, city: '', state: '', pincode: '' };
+    }
+};
+
 // ─── Shared field sx ──────────────────────────────────────────────────────────
 const fieldSx = {
     '& .MuiOutlinedInput-root': {
@@ -188,7 +209,8 @@ export default function Profile({ onLogout }) {
     const [addressDialog, setAddressDialog] = useState(false);
     const [form, setForm] = useState({ name: '', email: '', phone: '' });
     const [passwordForm, setPasswordForm] = useState({ current_password: '', password: '', password_confirmation: '' });
-    const [newAddress, setNewAddress] = useState({ type: 'Home', address: '', phone: '' });
+    const [newAddress, setNewAddress] = useState({ type: 'Home', street: '', city: '', state: '', pincode: '', phone: '', is_default: false });
+    const [addressErrors, setAddressErrors] = useState({});
 
     const handleSaveProfile = async () => {
         setLoading(true);
@@ -238,25 +260,81 @@ export default function Profile({ onLogout }) {
 
     const handleOpenAddAddress = () => {
         setAddressFormMode('add');
-        setNewAddress({ type: 'Home', address: '', phone: '', is_default: false });
+        setNewAddress({ type: 'Home', street: '', city: '', state: '', pincode: '', phone: '', is_default: false });
+        setAddressErrors({});
         setAddressDialog(true);
     };
 
     const handleOpenEditAddress = (addr) => {
         setAddressFormMode('edit');
         setEditingAddressId(addr.id);
-        setNewAddress({ type: addr.type, address: addr.address, phone: addr.phone || '', is_default: addr.is_default });
+        const parsed = parseAddressString(addr.address);
+        setNewAddress({
+            type: addr.type,
+            street: addr.street || parsed.street,
+            city: addr.city || parsed.city,
+            state: addr.state || parsed.state,
+            pincode: addr.pincode || parsed.pincode,
+            phone: addr.phone || '',
+            is_default: addr.is_default
+        });
+        setAddressErrors({});
         setAddressDialog(true);
     };
 
+    const validateAddressForm = () => {
+        const errs = {};
+        if (!newAddress.street || !newAddress.street.trim()) {
+            errs.street = 'Street address is required';
+        }
+        if (!newAddress.city || !newAddress.city.trim()) {
+            errs.city = 'City is required';
+        }
+        if (!newAddress.state || !newAddress.state.trim()) {
+            errs.state = 'State is required';
+        }
+        if (!newAddress.pincode || !newAddress.pincode.trim()) {
+            errs.pincode = 'Pincode is required';
+        } else if (!/^\d{6}$/.test(newAddress.pincode.trim())) {
+            errs.pincode = 'Pincode must be a valid 6-digit number';
+        }
+        if (newAddress.phone && newAddress.phone.trim() && !/^\d{10}$/.test(newAddress.phone.trim())) {
+            errs.phone = 'Phone must be a valid 10-digit number';
+        }
+
+        setAddressErrors(errs);
+        return Object.keys(errs).length === 0;
+    };
+
     const handleAddAddress = async () => {
+        if (!validateAddressForm()) {
+            return;
+        }
         setLoading(true);
         try {
+            const combinedAddress = [
+                newAddress.street,
+                newAddress.city,
+                newAddress.state,
+                newAddress.pincode
+            ].filter(part => part && part.trim() !== '').join(', ');
+
+            const payload = {
+                type: newAddress.type,
+                address: combinedAddress,
+                street: newAddress.street,
+                city: newAddress.city,
+                state: newAddress.state,
+                pincode: newAddress.pincode,
+                phone: newAddress.phone,
+                is_default: newAddress.is_default
+            };
+
             if (addressFormMode === 'add') {
-                await api.post('/addresses', newAddress);
+                await api.post('/addresses', payload);
                 setSnackbar({ open: true, message: 'Address added successfully!', severity: 'success' });
             } else {
-                await api.put(`/addresses/${editingAddressId}`, newAddress);
+                await api.put(`/addresses/${editingAddressId}`, payload);
                 setSnackbar({ open: true, message: 'Address updated successfully!', severity: 'success' });
             }
             fetchAddresses();
@@ -337,7 +415,7 @@ export default function Profile({ onLogout }) {
 
     return (
         <Box sx={{ minHeight: '100vh', bgcolor: BG_GRAY, pt: { xs: 3, md: 4 }, pb: 8 }}>
-            <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
+            <Container maxWidth={false} sx={{ maxWidth: '1300.2px !important', px: { xs: 2, sm: 3 } }}>
 
                 {/* ── Hero Card ── */}
                 <Paper
@@ -443,7 +521,6 @@ export default function Profile({ onLogout }) {
                     </Box>
                 </Paper>
 
-                {/* ── Main Layout ── */}
                 <Grid container spacing={3}>
 
                     {/* Desktop Sidebar */}
@@ -455,9 +532,10 @@ export default function Profile({ onLogout }) {
                                     borderRadius: 4,
                                     border: CARD_BORDER,
                                     overflow: 'hidden',
-                                    position: 'sticky',
-                                    top: 100,
                                     backgroundColor: '#fff',
+                                    position: 'sticky',
+                                    top: 125,
+                                    zIndex: 10,
                                 }}
                             >
                                 {navItems.map((item) => (
@@ -701,7 +779,7 @@ export default function Profile({ onLogout }) {
                                                 position: 'relative',
                                             }}
                                         >
-                                            {addr.is_default && (
+                                            {!!addr.is_default && (
                                                 <Chip
                                                     label="Default"
                                                     size="small"
@@ -844,24 +922,86 @@ export default function Profile({ onLogout }) {
                             <option value="Other">Other</option>
                         </TextField>
                         <TextField
-                            label="Full Address"
-                            multiline
-                            rows={3}
-                            value={newAddress.address}
-                            onChange={(e) => setNewAddress({ ...newAddress, address: e.target.value })}
+                            label="Street Address"
+                            value={newAddress.street}
+                            onChange={(e) => {
+                                setNewAddress({ ...newAddress, street: e.target.value });
+                                if (addressErrors.street) setAddressErrors({ ...addressErrors, street: '' });
+                            }}
                             size="small"
                             fullWidth
-                            placeholder="Street address, city, state, pincode"
+                            placeholder="House No, Building, Street, Area"
                             sx={fieldSx}
+                            required
+                            error={!!addressErrors.street}
+                            helperText={addressErrors.street}
+                        />
+                        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                            <TextField
+                                label="City"
+                                value={newAddress.city}
+                                onChange={(e) => {
+                                    setNewAddress({ ...newAddress, city: e.target.value });
+                                    if (addressErrors.city) setAddressErrors({ ...addressErrors, city: '' });
+                                }}
+                                size="small"
+                                fullWidth
+                                placeholder="City"
+                                sx={fieldSx}
+                                required
+                                error={!!addressErrors.city}
+                                helperText={addressErrors.city}
+                            />
+                            <TextField
+                                label="State"
+                                value={newAddress.state}
+                                onChange={(e) => {
+                                    setNewAddress({ ...newAddress, state: e.target.value });
+                                    if (addressErrors.state) setAddressErrors({ ...addressErrors, state: '' });
+                                }}
+                                size="small"
+                                fullWidth
+                                placeholder="State"
+                                sx={fieldSx}
+                                required
+                                error={!!addressErrors.state}
+                                helperText={addressErrors.state}
+                            />
+                        </Stack>
+                        <TextField
+                            label="Pincode"
+                            value={newAddress.pincode}
+                            onChange={(e) => {
+                                const val = e.target.value.replace(/\D/g, '');
+                                if (val.length <= 6) {
+                                    setNewAddress({ ...newAddress, pincode: val });
+                                    if (addressErrors.pincode) setAddressErrors({ ...addressErrors, pincode: '' });
+                                }
+                            }}
+                            size="small"
+                            fullWidth
+                            placeholder="6-digit Pincode"
+                            sx={fieldSx}
+                            required
+                            error={!!addressErrors.pincode}
+                            helperText={addressErrors.pincode}
                         />
                         <TextField
                             label="Phone Number"
                             value={newAddress.phone}
-                            onChange={(e) => setNewAddress({ ...newAddress, phone: e.target.value })}
+                            onChange={(e) => {
+                                const val = e.target.value.replace(/\D/g, '');
+                                if (val.length <= 10) {
+                                    setNewAddress({ ...newAddress, phone: val });
+                                    if (addressErrors.phone) setAddressErrors({ ...addressErrors, phone: '' });
+                                }
+                            }}
                             size="small"
                             fullWidth
                             placeholder="Contact number for delivery"
                             sx={fieldSx}
+                            error={!!addressErrors.phone}
+                            helperText={addressErrors.phone}
                         />
                         <FormControlLabel
                             control={<Checkbox checked={newAddress.is_default} onChange={(e) => setNewAddress({ ...newAddress, is_default: e.target.checked })} sx={{ color: OLIVE_GREEN, '&.Mui-checked': { color: OLIVE_GREEN } }} />}

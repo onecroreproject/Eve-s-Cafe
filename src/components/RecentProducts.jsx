@@ -225,11 +225,26 @@ const css = `
     opacity: 0;
     transition: all 0.3s ease;
     pointer-events: none;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  /* Skeleton Loading Styles */
+  @keyframes skeletonShimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
   }
-  .toast.show {
-    transform: translateX(-50%) translateY(0);
-    opacity: 1;
+  .skeleton-item {
+    background: linear-gradient(90deg, #f9fafb 25%, #f3f4f6 37%, #f9fafb 63%);
+    background-size: 400% 100%;
+    animation: skeletonShimmer 1.4s ease infinite;
+    border-radius: 4px;
+  }
+  .skeleton-card {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    overflow: hidden;
+    height: 100%;
+    border: 1px solid #f3f4f6;
+    border-radius: 12px;
+    padding: 0;
   }
 `;
 
@@ -326,9 +341,39 @@ const RecentProducts = () => {
         </div>
 
         <div className="p-grid">
-          {recentItems.map((product) => (
-            <div key={product.id} className="p-card-wrapper">
-              <div className="p-card">
+          {loading ? (
+            [...Array(8)].map((_, i) => (
+              <div key={i} className="skeleton-card" style={{ height: '100%', minHeight: '400px' }}>
+                {/* Image Area */}
+                <div className="skeleton-item" style={{ width: '100%', paddingBottom: '110%', borderRadius: '12px 12px 0 0' }} />
+                {/* Body Area */}
+                <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', flex: 1, gap: '12px' }}>
+                  {/* Category */}
+                  <div className="skeleton-item" style={{ width: '40%', height: '10px', borderRadius: '4px' }} />
+                  {/* Name (multiline) */}
+                  <div className="skeleton-item" style={{ width: '90%', height: '14px', borderRadius: '4px' }} />
+                  <div className="skeleton-item" style={{ width: '70%', height: '14px', borderRadius: '4px', marginBottom: '8px' }} />
+                  {/* Stars */}
+                  <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                    {[...Array(5)].map((_, starIdx) => (
+                      <div key={starIdx} className="skeleton-item" style={{ width: '10px', height: '10px', borderRadius: '50%' }} />
+                    ))}
+                    <div className="skeleton-item" style={{ width: '50px', height: '8px', borderRadius: '4px', marginLeft: '6px' }} />
+                  </div>
+                  {/* Divider */}
+                  <div style={{ height: '1px', background: 'rgba(26,60,46,0.08)', margin: '8px 0 4px' }} />
+                  {/* Footer (Price & Button) */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
+                    <div className="skeleton-item" style={{ width: '60px', height: '18px', borderRadius: '4px' }} />
+                    <div className="skeleton-item" style={{ width: '90px', height: '28px', borderRadius: '30px' }} />
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            recentItems.map((product) => (
+              <div key={product.id} className="p-card-wrapper">
+                <div className="p-card">
                 <div
                   className="p-img"
                   style={{ cursor: 'pointer' }}
@@ -383,7 +428,7 @@ const RecentProducts = () => {
                 </div>
               </div>
             </div>
-          ))}
+          )))}
         </div>
 
         {/* View All Products Button at bottom */}

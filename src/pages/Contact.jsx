@@ -101,15 +101,21 @@ const css = `
     color: #fff;
     font-size: clamp(2.5rem, 5vw, 4.8rem);
     font-family: 'Playfair Display', serif;
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1.1;
     margin: 0 0 0.5rem;
+    letter-spacing: -0.01em;
   }
   .ct-hero-title span {
-    font-style: italic;
     color: ${A};
-    font-weight: 400;
+    font-weight: 700;
     display: inline-block;
+  }
+  .luxury-serif { font-family: 'Playfair Display', serif; }
+  .text-gradient {
+    background: linear-gradient(to right, #D4B28C, ${A});
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
   .ct-hero-desc {
     color: #c0c8c3;
@@ -641,8 +647,8 @@ const Contact = () => {
                 <span></span>
                 <p>Handcrafted · Botanical · Organic</p>
               </div>
-              <h1 className="ct-hero-title">
-                Get In <span>Touch</span>
+              <h1 className="ct-hero-title luxury-serif">
+                Get In <span className="text-gradient">Touch</span>
               </h1>
               <p className="ct-hero-desc">
                 We'd love to hear from you — reach out for inquiries, collaborations, 

@@ -112,16 +112,22 @@ const css = `
     color: #fff;
     font-size: clamp(2.5rem, 5vw, 4.8rem);
     font-family: 'Playfair Display', serif;
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1.1;
     margin: 0 0 0.5rem;
+    letter-spacing: -0.01em;
   }
   .bl-hero-script {
-    font-style: italic;
     color: ${A};
-    font-weight: 400;
+    font-weight: 700;
     display: inline-block;
     margin-left: 0.2em;
+  }
+  .luxury-serif { font-family: 'Playfair Display', serif; }
+  .text-gradient {
+    background: linear-gradient(to right, #D4B28C, ${A});
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
   .bl-hero-desc {
     color: #c0c8c3;
@@ -757,9 +763,9 @@ const Blog = () => {
                 <span></span>
                 <p>EvesCafe · Botanical Wisdom · Journal</p>
               </div>
-              <h1 className="bl-hero-title">
+              <h1 className="bl-hero-title luxury-serif">
                 {searchTerm ? 'Search' : 'Botanical'}
-                <span className="bl-hero-script">
+                <span className="bl-hero-script text-gradient">
                   {searchTerm ? `"${searchTerm}"` : 'Journal'}
                 </span>
               </h1>
@@ -813,9 +819,13 @@ const Blog = () => {
           {/* Results bar + search */}
           <div className="bl-results-bar">
             <span>
-              {loading
-                ? 'Refreshing ritual library…'
-                : `Showing <strong>${filteredPosts.length}</strong> post${filteredPosts.length !== 1 ? 's' : ''}`}
+              {loading ? (
+                'Refreshing ritual library…'
+              ) : (
+                <span>
+                  Showing <strong>{filteredPosts.length}</strong> post{filteredPosts.length !== 1 ? 's' : ''}
+                </span>
+              )}
             </span>
 
             <div className="bl-search-wrap">

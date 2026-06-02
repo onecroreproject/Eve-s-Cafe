@@ -192,7 +192,6 @@ const BlogDetail = () => {
                 sx={{ 
                   fontFamily: FONT_SANS, 
                   color: BOTANICAL_PRIMARY, 
-                  fontStyle: 'italic', 
                   mb: 4, 
                   lineHeight: 1.6,
                   fontWeight: 500,
@@ -221,10 +220,11 @@ const BlogDetail = () => {
                   '& ul': { listStyleType: 'disc' },
                   '& ol': { listStyleType: 'decimal' },
                   '& img': { width: '100%', borderRadius: 3, my: 4, boxShadow: '0 10px 20px rgba(0,0,0,0.05)' },
+                  '& em': { fontStyle: 'normal' },
                   '& blockquote': { 
                     borderLeft: `5px solid ${BOTANICAL_PRIMARY}`, 
                     pl: 4, py: 2, my: 4, 
-                    fontStyle: 'italic', 
+                    fontStyle: 'normal', 
                     fontSize: '1.2rem',
                     color: BOTANICAL_PRIMARY,
                     bgcolor: 'rgba(85, 107, 47, 0.05)',

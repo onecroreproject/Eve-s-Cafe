@@ -755,22 +755,23 @@
 
 /* Custom scrollbar for green theme */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgb(var(--surface));
+  background: #F4F5F2;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgb(var(--primary));
+  background: #1A3C2E;
   border-radius: 10px;
+  border: 2px solid #F4F5F2;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgb(var(--primary-dark));
+  background: #B48253;
 }
 
 /* Loading spinner with green color */

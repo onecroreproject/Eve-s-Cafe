@@ -36,16 +36,22 @@ const GLOBAL = `
     color: #fff;
     font-size: clamp(2.5rem, 5vw, 4.8rem);
     font-family: 'Playfair Display', serif;
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1.1;
     margin: 0 0 1.5rem;
+    letter-spacing: -0.01em;
   }
   .ab-hero-title span {
-    font-style: italic;
     color: ${A};
-    font-weight: 400;
+    font-weight: 700;
     display: inline-block;
     margin-left: 0.2em;
+  }
+  .luxury-serif { font-family: 'Playfair Display', serif; }
+  .text-gradient {
+    background: linear-gradient(to right, #D4B28C, ${A});
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 `;
 
@@ -207,8 +213,8 @@ const About = () => {
                   <span className="text-white/90 font-semibold tracking-[0.2em] uppercase text-[0.65rem]">Our Botanical Story</span>
                 </div>
 
-                <h1 className="ab-hero-title">
-                  Rooted in <span>Wisdom</span>
+                <h1 className="ab-hero-title luxury-serif">
+                  Rooted in <span className="text-gradient">Wisdom</span>
                 </h1>
 
                 <p className="text-white/80 max-w-[500px] text-[0.85rem] md:text-[0.95rem] leading-relaxed mb-6">
@@ -303,7 +309,7 @@ const About = () => {
       <div className="bg-white py-16 md:py-24 text-center">
         <div className="max-w-[1300px] mx-auto px-4 sm:px-6 md:px-8">
           <div className="font-serif text-[4rem] md:text-[8rem] text-[#1A3C2E] opacity-8 leading-none mb-2">"</div>
-          <p className="rv font-serif italic font-normal text-xl sm:text-2xl md:text-3xl text-black leading-relaxed mb-12 max-w-[850px] mx-auto">
+          <p className="rv font-serif font-normal text-xl sm:text-2xl md:text-3xl text-black leading-relaxed mb-12 max-w-[850px] mx-auto">
             "Nature doesn't rush, yet everything is accomplished. We created EvesCafe to bring that same patient, potent wisdom to your daily ritual — one sacred drop at a time."
           </p>
           <div className="flex items-center justify-center gap-6">
@@ -363,7 +369,7 @@ const About = () => {
             <span className="font-sans text-[0.65rem] font-semibold tracking-[0.2rem] uppercase text-white/80">Join the Sanctuary</span>
           </div>
           <h2 className="rv font-serif font-bold text-white text-3xl sm:text-4xl md:text-5xl mb-2">Begin Your</h2>
-          <h2 className="rv font-serif italic font-light text-[#B48253] text-3xl sm:text-4xl md:text-5xl mb-8">Ritual</h2>
+          <h2 className="rv font-serif font-bold text-[#B48253] text-3xl sm:text-4xl md:text-5xl mb-8">Ritual</h2>
           <p className="rv text-white/70 mb-10 max-w-[500px] mx-auto text-base leading-relaxed">
             Stay connected with botanical insights, moon-cycle rituals, and exclusive sacred herb announcements delivered to your sanctuary.
           </p>
