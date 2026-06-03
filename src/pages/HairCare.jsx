@@ -12,6 +12,7 @@ import {
   Chip,
   IconButton,
 } from '@mui/material';
+import CustomButton from '../components/Button';
 import {
   Favorite as FavoriteIcon,
   FavoriteBorder as FavoriteBorderIcon,
@@ -131,9 +132,11 @@ const HairCare = () => {
             <Typography variant="body1" sx={{ color: 'text.secondary', mb: 5, fontSize: '1.1rem', lineHeight: 1.8 }}>
               Harnessing the power of cold-pressed botanicals and ancient ayurvedic oils to restore your hair's natural vitality and crown-like luster.
             </Typography>
-            <Button variant="contained" size="large" onClick={() => navigate('/shop/hair-care')} sx={{ bgcolor: GREEN, px: 4, py: 2, borderRadius: 0, textTransform: 'uppercase', fontWeight: 700, letterSpacing: '.1em', '&:hover': { bgcolor: '#143022' } }}>
-              Explore Collection
-            </Button>
+            <Box sx={{ mt: 2 }}>
+              <CustomButton to="/shop/hair-care" variant="primary">
+                Explore Collection
+              </CustomButton>
+            </Box>
           </Box>
         </Container>
       </Box>
@@ -255,9 +258,11 @@ const HairCare = () => {
                 </Box>
               ))}
             </Box>
-            <Button onClick={() => navigate('/about')} variant="outlined" sx={{ mt: 6, borderColor: GREEN, color: GREEN, px: 4, py: 1.5, borderRadius: 0, fontWeight: 700 }}>
-              Read Our Science
-            </Button>
+            <Box sx={{ mt: 6 }}>
+              <CustomButton to="/about" variant="outline">
+                Read Our Science
+              </CustomButton>
+            </Box>
           </Grid>
         </Grid>
       </Container>

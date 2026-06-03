@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import CustomButton from '../components/Button';
 import { useMediaQuery, useTheme, Skeleton, Snackbar, Alert, Container, Typography, Box, Grid, Stack, Button } from '@mui/material';
 import api, { IMAGE_BASE_URL } from '../api/config';
 
@@ -654,18 +655,13 @@ const ProductDetail = () => {
 
                 {/* CTA Buttons */}
                 <Box sx={{ display: 'flex', gap: 2, mb: 4 }}>
-                  <button
+                  <CustomButton
                     onClick={handleAddToCart}
-                    style={{
-                      flex: 1, padding: '14px 24px',
-                      background: added ? GREEN : G, color: WHITE,
-                      border: 'none', borderRadius: 10, cursor: 'pointer',
-                      fontWeight: 700, fontSize: '0.85rem', letterSpacing: '1px',
-                      textTransform: 'uppercase', transition: 'all 0.2s',
-                    }}
+                    variant={added ? 'outline' : 'primary'}
+                    className="flex-1"
                   >
                     {added ? '✓ Added to Cart' : 'Add to Cart'}
-                  </button>
+                  </CustomButton>
                   <button
                     onClick={toggleWishlist}
                     style={{
@@ -1237,9 +1233,9 @@ const ProductDetail = () => {
               <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: G }}>₹{pkg.price?.toLocaleString('en-IN')}</Typography>
             </Box>
           </Box>
-          <button onClick={handleAddToCart} style={{ padding: '12px 32px', background: added ? GREEN : G, color: WHITE, border: 'none', borderRadius: 10, fontWeight: 700, cursor: 'pointer' }}>
+          <CustomButton onClick={handleAddToCart} variant={added ? 'outline' : 'primary'}>
             {added ? 'Added' : 'Add to Cart'}
-          </button>
+          </CustomButton>
         </Container>
       </Box>
 

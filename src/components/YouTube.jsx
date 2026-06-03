@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import StoryPlayer from './StoryPlayer';
+import Button from './Button';
 import img1 from '../assets/recentproducts/537.jpg';
 import img2 from '../assets/recentproducts/538.jpg';
 import img3 from '../assets/recentproducts/539.jpg';
@@ -37,8 +38,8 @@ const YouTube = () => {
     <section className="pt-0 pb-12 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
         {/* Header */}
-        <div className="text-center mb-16 px-4">
-          <span className="text-[rgb(var(--primary))] font-bold uppercase tracking-[0.3em] text-[0.65rem] mb-4 block">Visual Rituals</span>
+        <div className="text-center mb-16 px-4 py-4">
+    
           <h2 className="text-4xl md:text-5xl font-bold text-[#1A3C2E] leading-tight mb-4 luxury-serif">
             Our Story <span className="text-gradient">Reels</span>
           </h2>
@@ -161,20 +162,20 @@ const YouTube = () => {
           initialIndex={currentIndex} 
         />
 
-        {/* Channel Link */}
         <div className="text-center mt-12">
-          <a 
-            href="https://youtube.com" 
+          <Button
+            href="https://youtube.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[rgb(var(--primary))] font-bold uppercase tracking-[0.4em] text-[0.6rem] border-b-2 border-[rgb(var(--primary)/0.2)] pb-2 hover:border-[rgb(var(--primary))] transition-all"
+            variant="outline"
           >
             Explore Full Wisdom
-          </a>
+          </Button>
         </div>
       </div>
     </section>
   );
 };
 
-export default YouTube;
+export default YouTube;
+

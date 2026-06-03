@@ -1,7 +1,7 @@
 import React from 'react';
-import { Container, Typography, Box, Button, Grid } from '@mui/material';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { Container, Typography, Box, Grid } from '@mui/material';
 import { Link } from 'react-router-dom';
+import Button from './Button';
 import heritageImg from '../assets/generated/botanical_heritage_ritual_1776410772203.png';
 
 // Design Tokens
@@ -86,20 +86,9 @@ const AboutHeritage = () => {
               </Typography>
 
               <Button
-                component={Link}
                 to="/about"
-                variant="contained"
-                endIcon={<ArrowForwardIcon sx={{ fontSize: { xs: '0.7rem', md: '1rem' } }} />}
-                sx={{
-                  bgcolor: BLACK, color: 'white',
-                  borderRadius: 1.5, 
-                  px: { xs: 1.5, sm: 3, md: 4, lg: 5 }, 
-                  py: { xs: 0.5, sm: 1, md: 1.2, lg: 1.5 }, 
-                  textTransform: 'none', 
-                  fontWeight: 700,
-                  fontSize: { xs: '0.65rem', sm: '0.85rem', md: '0.9rem', lg: '1rem' },
-                  '&:hover': { bgcolor: '#222' }
-                }}
+                variant="primary"
+                icon="arrow-right"
               >
                 Explore the Rituals
               </Button>

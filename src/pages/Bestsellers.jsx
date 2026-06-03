@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Button from '../components/Button';
 import api, { IMAGE_BASE_URL } from '../api/config';
 
 // --- Brand constants (mirrors Shop.jsx exactly) ---
@@ -504,7 +505,7 @@ const Bestsellers = () => {
                 <p>Community Chosen · Botanical · Organic</p>
               </div>
               <h1 className="bs-hero-title">
-                Best <span>Sellers</span>
+                Best <span className="text-gradient">Sellers</span>
               </h1>
               <p className="bs-hero-desc">
                 {loading
@@ -588,20 +589,11 @@ const Bestsellers = () => {
             <div className="empty-state">
               <h3>Awaiting the Harvest</h3>
               <p>Our bestsellers are currently being prepared. Check back soon for fresh batches.</p>
-              <Link
-                to="/shop"
-                style={{
-                  color: A,
-                  fontWeight: 700,
-                  marginTop: '1.5rem',
-                  display: 'inline-block',
-                  fontSize: '0.75rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '1px',
-                }}
-              >
-                Explore Full Collection →
-              </Link>
+              <div className="mt-6">
+                <Button to="/shop" variant="outline" icon="arrow-right">
+                  Explore Full Collection
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="p-grid">

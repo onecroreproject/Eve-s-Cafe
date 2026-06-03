@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api, { IMAGE_BASE_URL } from '../api/config';
-import { Container, Typography, Box, Grid, Button, IconButton, Skeleton } from '@mui/material';
+import { Container, Typography, Box, Grid, IconButton, Skeleton } from '@mui/material';
+import CustomButton from '../components/Button';
 import { 
     DeleteOutlined as DeleteOutlineIcon, 
     ShoppingBagOutlined as ShoppingBagOutlinedIcon,
@@ -137,18 +138,15 @@ const Wishlist = () => {
                         <Typography variant="body1" sx={{ mb: 4, color: 'text.secondary' }}>
                             Add items that you love to your wishlist and they will appear here.
                         </Typography>
-                        <Button 
-                            variant="contained" 
-                            onClick={() => navigate('/shop')}
-                            sx={{ 
-                                bgcolor: '#1A3C2E', 
-                                px: 4, py: 1.5, 
-                                borderRadius: 50,
-                                '&:hover': { bgcolor: '#064E3B' }
-                            }}
-                        >
-                            Explore Collection
-                        </Button>
+                        <div className="mt-8">
+                            <CustomButton 
+                                onClick={() => navigate('/shop')}
+                                variant="primary"
+                                icon="arrow-right"
+                            >
+                                Explore Collection
+                            </CustomButton>
+                        </div>
                     </Box>
                 ) : (
                     <Grid container spacing={4}>
@@ -229,21 +227,13 @@ const Wishlist = () => {
                                             Rs. {product.price}
                                         </Typography>
                                         
-                                        <Button 
+                                        <CustomButton 
                                             fullWidth
-                                            variant="outlined"
-                                            startIcon={<ShoppingBagOutlinedIcon />}
+                                            variant="outline"
                                             onClick={() => navigate(`/product/${product.slug}`)}
-                                            sx={{ 
-                                                borderColor: '#1A3C2E', 
-                                                color: '#1A3C2E',
-                                                borderRadius: 2,
-                                                py: 1,
-                                                '&:hover': { bgcolor: '#1A3C2E', color: 'white' }
-                                            }}
                                         >
                                             View Details
-                                        </Button>
+                                        </CustomButton>
                                     </Box>
                                 </Box>
                             </Grid>

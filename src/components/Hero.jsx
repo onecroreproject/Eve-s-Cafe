@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import Button from './Button';
 import banner1 from '../assets/banner/banner1.jpg';
 import banner2 from '../assets/banner/banner2.jpg';
 import banner3 from '../assets/banner/banner3.jpg';
@@ -103,18 +104,20 @@ const Hero = () => {
                   </p>
 
                   <div className="flex flex-wrap gap-2 sm:gap-4 justify-center sm:justify-start">
-                    <Link
+                    <Button
                       to={slide.link}
-                      className="px-6 sm:px-10 py-2.5 sm:py-4 bg-white text-[rgb(var(--primary))] text-[10px] sm:text-xs font-bold tracking-[0.2em] uppercase rounded-full hover:bg-[rgb(var(--primary))] hover:text-white transition-all duration-300 shadow-xl"
+                      variant="white"
+                      className="shadow-xl"
                     >
                       {slide.cta}
-                    </Link>
-                    <Link
+                    </Button>
+                    <Button
                       to="/about"
-                      className="px-6 sm:px-10 py-2.5 sm:py-4 bg-transparent border border-white/50 text-white text-[10px] sm:text-xs font-bold tracking-[0.2em] uppercase rounded-full hover:bg-white hover:text-[rgb(var(--primary))] transition-all duration-300 backdrop-blur-sm"
+                      variant="white-outline"
+                      className="backdrop-blur-sm"
                     >
                       Our Story
-                    </Link>
+                    </Button>
                   </div>
                 </div>
               </div>

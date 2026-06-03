@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
+import Button from '../components/Button';
 import api, { IMAGE_BASE_URL } from '../api/config';
 
 // ── Design Tokens (Matching other pages) ──────────────────────────────────────────────
@@ -1015,6 +1016,11 @@ export default function Cart() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState('cart');
   const [cartItems, setCartItems] = useState([]);
+  
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    const token = localStorage.getItem('token');
+    return !!(token && token !== 'undefined' && token !== 'null');
+  });
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -1045,6 +1051,26 @@ export default function Cart() {
     loadCart();
     return () => document.head.removeChild(styleEl);
   }, []);
+
+  useEffect(() => {
+    const handleLoginSuccess = () => {
+      setIsLoggedIn(true);
+      if (currentStep === 'cart') {
+        setCurrentStep('delivery');
+        loadSavedAddresses();
+      }
+    };
+    const handleLogoutSuccess = () => {
+      setIsLoggedIn(false);
+      setCurrentStep('cart');
+    };
+    window.addEventListener('login-success', handleLoginSuccess);
+    window.addEventListener('logout-success', handleLogoutSuccess);
+    return () => {
+      window.removeEventListener('login-success', handleLoginSuccess);
+      window.removeEventListener('logout-success', handleLogoutSuccess);
+    };
+  }, [currentStep]);
 
 
 
@@ -1172,8 +1198,9 @@ export default function Cart() {
   };
 
   const handleNextStep = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
+    const currentToken = localStorage.getItem('token');
+    if (!currentToken || currentToken === 'undefined' || currentToken === 'null') {
+      setIsLoggedIn(false);
       window.dispatchEvent(new CustomEvent('open-login-modal', { detail: { mode: 'login' } }));
       return;
     }
@@ -1513,7 +1540,9 @@ export default function Cart() {
           <div className="empty-icon">🌿</div>
           <h2 className="empty-title">Your Ritual is Empty</h2>
           <p className="empty-sub">Begin your botanical discovery to curate your collection.</p>
-          <button className="empty-btn" onClick={() => navigate('/shop')}>Explore the Collection</button>
+          <div style={{ marginTop: '24px' }}>
+            <Button to="/shop" variant="outline" icon="arrow-right">Explore the Collection</Button>
+          </div>
         </div>
       </div>
     );
@@ -1988,7 +2017,7 @@ export default function Cart() {
                 ) : (
                   <button className="cta-btn" onClick={handleNextStep}>
                     <span>
-                      {!localStorage.getItem('token') && currentStep === 'cart' ? 'Login to Proceed' : (
+                      {!isLoggedIn && currentStep === 'cart' ? 'Login to Proceed' : (
                         <>
                           {currentStep === 'cart' && 'Proceed to Delivery'}
                           {currentStep === 'delivery' && 'Proceed to Payment'}
@@ -2019,7 +2048,7 @@ export default function Cart() {
               <span className="m-total-val">₹ {total.toLocaleString('en-IN')}</span>
             </div>
             <button className="m-btn" onClick={handleNextStep}>
-              {!localStorage.getItem('token') && currentStep === 'cart' ? 'Login' : (
+              {!isLoggedIn && currentStep === 'cart' ? 'Login' : (
                 <>
                   {currentStep === 'cart' && 'Checkout'}
                   {currentStep === 'delivery' && 'Pay Now'}

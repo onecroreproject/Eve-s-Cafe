@@ -1,6 +1,7 @@
 // Navbar.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import CustomButton from './Button';
 import {
   AppBar, Toolbar, IconButton, Button, Badge, Menu, MenuItem,
   Drawer, List, ListItem, ListItemIcon, ListItemText, Tooltip,
@@ -121,6 +122,7 @@ const Navbar = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setCurrentUser(null);
+        window.dispatchEvent(new Event('logout-success'));
       }
     }
   };
@@ -152,6 +154,7 @@ const Navbar = () => {
       localStorage.removeItem('user');
       setCurrentUser(null);
       handleProfileMenuClose();
+      window.dispatchEvent(new Event('logout-success'));
       navigate('/');
     }
   };
@@ -236,6 +239,7 @@ const Navbar = () => {
         setCurrentUser(response.data.data);
       }
       setLoginOpen(false);
+      window.dispatchEvent(new Event('login-success'));
     } catch (error) {
       console.error("Auth failed:", error);
       const serverErrors = error.response?.data?.errors;
@@ -737,21 +741,14 @@ const Navbar = () => {
                         Dazzling Solution <br />
                         <span>With Natural Touch</span>
                       </Typography>
-                      <Button
-                        component={Link}
+                      <CustomButton
                         to="/shop"
                         onClick={handleShopClose}
-                        variant="contained"
-                        size="small"
-                        sx={{
-                          bgcolor: '#fff', color: GREEN, fontWeight: 900, borderRadius: 2,
-                          textTransform: 'none', fontSize: '0.75rem',
-                          '&:hover': { bgcolor: '#f0f0f0', transform: 'translateY(-2px)', boxShadow: '0 8px 20px rgba(26,60,46,0.15)' },
-                          transition: 'all 0.3s ease',
-                        }}
+                        variant="white"
+                        className="mt-2"
                       >
                         Explore Collection
-                      </Button>
+                      </CustomButton>
                     </Box>
                   </Box>
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link, useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate, Link } from 'react-router-dom';
 import api, { IMAGE_BASE_URL } from '../api/config';
+import CustomButton from '../components/Button';
 
 // --- Constants (brand colors) ---
 const G = '#1A3C2E';   // Dark Green Background
@@ -803,13 +804,11 @@ const Shop = () => {
             <h3>No products found</h3>
             <p>{searchQueryParam ? `We couldn't find anything matching "${searchQueryParam}"` : 'Try selecting a different category.'}</p>
             {searchQueryParam && (
-              <button
-                onClick={() => navigate('/shop')}
-                className="cat-pill active"
-                style={{ marginTop: '1.5rem' }}
-              >
-                View All Products
-              </button>
+              <div className="mt-6">
+                <CustomButton to="/shop" variant="primary">
+                  View All Products
+                </CustomButton>
+              </div>
             )}
           </div>
         ) : (

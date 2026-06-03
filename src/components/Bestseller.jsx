@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Button from './Button';
 import api, { IMAGE_BASE_URL } from '../api/config';
 
 // --- Updated Brand Colors ---
@@ -205,12 +206,7 @@ const css = `
     transform: scale(1.05); 
   }
 
-  /* Decorative Heading */
-  .text-gradient {
-    background: linear-gradient(to right, #D4B28C, ${A});
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
+
 
   /* Toast notification */
   .toast {
@@ -363,7 +359,7 @@ const Bestsellers = () => {
       <div className="max-w-7xl mx-auto px-6 relative z-10 bestseller-section">
         <div className="flex flex-col items-center text-center mb-16 px-4">
           <h2 className="text-4xl md:text-5xl font-bold text-[#1A3C2E] leading-tight mb-4 luxury-serif">
-            Best <span className="text-gradient">Sellers</span>
+            Best <span style={{ background: 'linear-gradient(to right, #D4B28C, #B48253)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', color: 'transparent' }}>Sellers</span>
           </h2>
           <p className="text-gray-500 max-w-xl">
             Our most-loved botanical rituals, as chosen by our beautiful community.
@@ -463,20 +459,9 @@ const Bestsellers = () => {
 
         {/* View All Products Button at bottom */}
         <div className="text-center mt-16">
-          <Link
-            to="/shop"
-            className="inline-flex items-center gap-2 px-10 py-4 border-2 border-[#1A3C2E] text-[#1A3C2E] font-bold uppercase tracking-widest text-[0.75rem] rounded-full hover:bg-[#1A3C2E] hover:text-white transition-all duration-300 group"
-          >
+          <Button to="/shop" variant="outline" icon="arrow-right">
             Explore Full Shop
-            <svg
-              className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
+          </Button>
         </div>
       </div>
 

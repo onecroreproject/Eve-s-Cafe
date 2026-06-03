@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import Button from './Button';
 import api, { IMAGE_BASE_URL } from '../api/config';
 
 const skeletonCss = `
@@ -111,20 +112,9 @@ const ShopByCategory = () => {
 
         {/* View All Button */}
         <div className="text-center mt-12">
-          <Link
-            to="/shop"
-            className="inline-flex items-center gap-2 px-8 py-3 border-2 border-[#556B2F] text-[#556B2F] font-semibold uppercase tracking-wider text-sm rounded-full hover:bg-[#556B2F] hover:text-white transition-all duration-300 group"
-          >
+          <Button to="/shop" variant="outline" icon="arrow-right">
             Explore Full Collection
-            <svg
-              className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
+          </Button>
         </div>
       </div>
     </section>

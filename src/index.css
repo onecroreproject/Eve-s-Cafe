@@ -93,10 +93,11 @@
 
 /* Subtle Branding Gradient */
 .text-gradient {
-  background: linear-gradient(to right, #D4B28C, #B48253);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  background: linear-gradient(to right, #D4B28C, #B48253) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  color: transparent !important;
   display: inline-block;
   padding-right: 0.05em;
   margin-right: -0.05em;
