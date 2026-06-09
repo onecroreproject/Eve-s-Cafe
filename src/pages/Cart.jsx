@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
+import { Snackbar, Alert } from '@mui/material';
 import Button from '../components/Button';
 import api, { IMAGE_BASE_URL } from '../api/config';
 
@@ -1044,6 +1045,17 @@ export default function Cart() {
   });
   const [addressErrors, setAddressErrors] = useState({});
 
+  const [toast, setToast] = useState({ show: false, message: '', severity: 'error' });
+
+  const showToast = (message, severity = 'error') => {
+    setToast({ show: true, message, severity });
+  };
+
+  const handleCloseToast = (event, reason) => {
+    if (reason === 'clickaway') return;
+    setToast({ ...toast, show: false });
+  };
+
   useEffect(() => {
     const styleEl = document.createElement('style');
     styleEl.textContent = STYLES;
@@ -1556,16 +1568,16 @@ export default function Cart() {
                 if (res.data.success) {
                   navigate(`/thank-you?status=success&txnid=${data.orderID}`);
                 } else {
-                  alert(res.data.message || "Payment capture failed");
+                  showToast(res.data.message || "Payment capture failed");
                 }
               } catch (err) {
                 console.error("PayPal Capture Error:", err);
-                alert("Payment capture failed. Please contact support.");
+                showToast("Payment capture failed. Please contact support.");
               }
             },
             onError: (err) => {
               console.error("PayPal Button Error:", err);
-              alert("An error occurred with PayPal. Please try another payment method.");
+              showToast("An error occurred with PayPal. Please try another payment method.");
             },
             onCancel: () => {
               console.log("User cancelled PayPal payment");
@@ -1681,8 +1693,26 @@ export default function Cart() {
                       <p className="cart-item-name">{item.name}</p>
                       {item.variants && item.variants.length > 1 ? (
                         <select 
-                          className="cart-item-sub" 
-                          style={{ padding: '4px 8px', borderRadius: '4px', border: '1px solid #e0e0e0', background: 'transparent', outline: 'none', cursor: 'pointer', fontFamily: "'Playfair Display', serif", marginBottom: '16px', display: 'inline-block', width: 'fit-content' }}
+                          style={{ 
+                            appearance: 'none',
+                            padding: '6px 32px 6px 12px', 
+                            borderRadius: '8px', 
+                            border: '1px solid #e0e0e0', 
+                            background: `url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231A3C2E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 8px center / 14px`,
+                            backgroundColor: '#F4F5F2',
+                            outline: 'none', 
+                            cursor: 'pointer', 
+                            fontFamily: "'Playfair Display', serif", 
+                            fontSize: '0.85rem',
+                            fontWeight: 600,
+                            color: '#1A3C2E',
+                            marginBottom: '16px', 
+                            display: 'inline-block', 
+                            width: 'fit-content',
+                            transition: 'all 0.2s',
+                          }}
+                          onMouseOver={(e) => e.currentTarget.style.borderColor = '#1A3C2E'}
+                          onMouseOut={(e) => e.currentTarget.style.borderColor = '#e0e0e0'}
                           value={item.variant_id} 
                           onChange={(e) => updateVariant(item.id, item.variant_id, parseInt(e.target.value))}
                         >
@@ -2155,6 +2185,17 @@ export default function Cart() {
           </div>
         </div>
       )}
+
+      <Snackbar
+        open={toast.show}
+        autoHideDuration={4000}
+        onClose={handleCloseToast}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseToast} severity={toast.severity} sx={{ width: '100%', fontFamily: "'Playfair Display', serif" }}>
+          {toast.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Button from '../components/Button';
+import { Snackbar, Alert } from '@mui/material';
 import api, { IMAGE_BASE_URL } from '../api/config';
 
 // --- Brand constants (mirrors Shop.jsx exactly) ---
@@ -337,19 +337,6 @@ const css = `
     font-size: 2rem; color: ${G}; margin-bottom: 1rem;
   }
 
-  /* ── Toast ─────────────────────────────────────────────────────── */
-  .toast {
-    position: fixed; bottom: 30px; left: 50%;
-    transform: translateX(-50%) translateY(100px);
-    background: ${G}; color: #fff;
-    padding: 12px 28px; border-radius: 50px;
-    font-size: 0.85rem; font-weight: 500;
-    z-index: 1000; opacity: 0;
-    transition: all 0.3s ease; pointer-events: none;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-    white-space: nowrap;
-  }
-  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
   /* ── Responsive hero tweaks ────────────────────────────────────── */
   @media (max-width: 768px) {
@@ -362,7 +349,6 @@ const css = `
   @media (max-width: 480px) {
     .bs-hero { padding: 1.5rem 1rem 2rem; }
     .bs-container { padding: 0 0.75rem 2rem; }
-    .toast { white-space: normal; text-align: center; max-width: 90%; }
   }
 
   /* Skeleton Loading Styles */
@@ -415,7 +401,11 @@ const Bestsellers = () => {
 
   const showToast = (message) => {
     setToast({ show: true, message });
-    setTimeout(() => setToast({ show: false, message: '' }), 2000);
+  };
+
+  const handleCloseToast = (event, reason) => {
+    if (reason === 'clickaway') return;
+    setToast({ ...toast, show: false });
   };
 
   const isFavorited = (id) => favorites.includes(id);
@@ -513,7 +503,7 @@ const Bestsellers = () => {
   return (
     <>
       <style>{css}</style>
-      <div className="bs-root">
+      <div className="bs-root" onClick={() => setSelectingPackFor(null)}>
 
         {/* ── Hero Without BG Image ── */}
         <div className="bs-hero">
@@ -575,7 +565,7 @@ const Bestsellers = () => {
 
           {loading ? (
             <div className="p-grid" style={{ width: '100%', gridColumn: '1 / -1' }}>
-              {[...Array(8)].map((_, i) => (
+              {[...Array(12)].map((_, i) => (
                 <div key={i} className="skeleton-card" style={{ height: '100%', minHeight: '400px' }}>
                   {/* Image Area */}
                   <div className="skeleton-item" style={{ width: '100%', paddingBottom: '110%', borderRadius: '12px 12px 0 0' }} />
@@ -730,8 +720,16 @@ const Bestsellers = () => {
 
 
 
-      {/* Toast */}
-      <div className={`toast ${toast.show ? 'show' : ''}`}>{toast.message}</div>
+      <Snackbar
+        open={toast.show}
+        autoHideDuration={3000}
+        onClose={handleCloseToast}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseToast} severity="success" sx={{ width: '100%', bgcolor: '#1a3c2e', color: '#fff', '& .MuiAlert-icon': { color: '#fff' } }}>
+          {toast.message}
+        </Alert>
+      </Snackbar>
     </>
   );
 };

@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useParams, useLocation, useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
+import { Snackbar, Alert } from '@mui/material';
 import api, { IMAGE_BASE_URL } from '../api/config';
 import CustomButton from '../components/Button';
 
@@ -485,29 +486,6 @@ const css = `
     margin-bottom: 1rem;
   }
 
-  /* Toast notification */
-  .toast {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%) translateY(100px);
-    background: ${G};
-    color: white;
-    padding: 12px 28px;
-    border-radius: 50px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    z-index: 1000;
-    opacity: 0;
-    transition: all 0.3s ease;
-    pointer-events: none;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-    white-space: nowrap;
-  }
-  .toast.show {
-    transform: translateX(-50%) translateY(0);
-    opacity: 1;
-  }
 
   /* Responsive */
   @media (max-width: 768px) {
@@ -516,8 +494,8 @@ const css = `
     .hero-stats { align-self: flex-start; }
     .shop-container { padding: 0 1rem 3rem; }
     .results-count { flex-direction: column; gap: 1rem; align-items: flex-start; }
-    .toast { white-space: normal; text-align: center; max-width: 90%; }
   }
+
   @media (max-width: 480px) {
     .shop-hero { padding: 1.5rem 1rem 2rem; }
     .shop-container { padding: 0 0.75rem 2rem; }
@@ -645,7 +623,11 @@ const Shop = () => {
 
   const showToast = (message) => {
     setToast({ show: true, message });
-    setTimeout(() => setToast({ show: false, message: '' }), 2000);
+  };
+
+  const handleCloseToast = (event, reason) => {
+    if (reason === 'clickaway') return;
+    setToast({ ...toast, show: false });
   };
 
   const handleAddToCartClick = (product, e) => {
@@ -698,7 +680,7 @@ const Shop = () => {
   }, [activeCategory, products]);
 
   return (
-    <div className="shop-page">
+    <div className="shop-page" onClick={() => setSelectingPackFor(null)}>
       <style>{css}</style>
 
       {/* Hero Banner Area - Without BG Image */}
@@ -789,7 +771,7 @@ const Shop = () => {
         {/* Product Grid / Loading State */}
         {(loading || listLoading) ? (
           <div className="p-grid" style={{ width: '100%', gridColumn: '1 / -1' }}>
-            {[...Array(8)].map((_, i) => (
+            {[...Array(12)].map((_, i) => (
               <div key={i} className="skeleton-card" style={{ height: '100%', minHeight: '400px' }}>
                 {/* Image Area */}
                 <div className="skeleton-item" style={{ width: '100%', paddingBottom: '110%', borderRadius: '12px 12px 0 0' }} />
@@ -948,10 +930,16 @@ const Shop = () => {
 
 
 
-      {/* Toast Notification */}
-      <div className={`toast ${toast.show ? 'show' : ''}`}>
-        {toast.message}
-      </div>
+      <Snackbar
+        open={toast.show}
+        autoHideDuration={3000}
+        onClose={handleCloseToast}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseToast} severity="success" sx={{ width: '100%', bgcolor: G, color: '#fff', '& .MuiAlert-icon': { color: '#fff' } }}>
+          {toast.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };
