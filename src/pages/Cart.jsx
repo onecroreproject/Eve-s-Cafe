@@ -1649,7 +1649,30 @@ export default function Cart() {
                 </div>
 
                 {enrichedItems.map(item => (
-                  <div key={`${item.id}-${item.variant_id}`} className="cart-item">
+                  <div key={`${item.id}-${item.variant_id}`} className="cart-item" style={{ position: 'relative' }}>
+                    <button 
+                      onClick={() => removeItem(item.id, item.variant_id)}
+                      style={{
+                        position: 'absolute',
+                        top: '12px',
+                        right: '12px',
+                        background: 'none',
+                        border: 'none',
+                        color: '#e74c3c',
+                        fontSize: '1.4rem',
+                        cursor: 'pointer',
+                        padding: '4px',
+                        lineHeight: 1,
+                        transition: 'transform 0.2s',
+                        zIndex: 10
+                      }}
+                      onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.2)'}
+                      onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                      aria-label="Remove item"
+                      title="Remove item"
+                    >
+                      &times;
+                    </button>
                     <div className="cart-item-image">
                       <img src={item.image} alt={item.name} />
                     </div>
@@ -1670,7 +1693,6 @@ export default function Cart() {
                       ) : (
                         <p className="cart-item-sub">{item.label} · ₹{item.unitPrice?.toLocaleString('en-IN')} per unit</p>
                       )}
-                      <button className="cart-item-remove" onClick={() => removeItem(item.id, item.variant_id)}>Remove</button>
                     </div>
                     <div className="qty-control">
                       <button className="qty-btn" onClick={() => updateQty(item.id, item.variant_id, 1)}><Plus /></button>
