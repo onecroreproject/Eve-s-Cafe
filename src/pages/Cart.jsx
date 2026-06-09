@@ -1351,6 +1351,31 @@ export default function Cart() {
     window.dispatchEvent(new Event('cart-updated'));
   };
 
+  const updateVariant = (id, old_variant_id, new_variant_id) => {
+    if (old_variant_id === new_variant_id) return;
+    const updated = [...cartItems];
+    const index = updated.findIndex(i => i.id === id && i.variant_id === old_variant_id);
+    if (index > -1) {
+      const existingIndex = updated.findIndex(i => i.id === id && i.variant_id === new_variant_id);
+      if (existingIndex > -1 && existingIndex !== index) {
+        updated[existingIndex].quantity += updated[index].quantity;
+        updated.splice(index, 1);
+      } else {
+        updated[index].variant_id = new_variant_id;
+        const product = products.find(p => p.id === id);
+        if (product) {
+          const newVariant = product.variants?.find(v => v.id === new_variant_id);
+          if (newVariant) {
+            updated[index].price = newVariant.price;
+          }
+        }
+      }
+    }
+    setCartItems(updated);
+    localStorage.setItem('cartItems', JSON.stringify(updated));
+    window.dispatchEvent(new Event('cart-updated'));
+  };
+
   const formatImg = (path) => {
     if (!path || typeof path !== 'string') return 'https://placehold.co/400x400?text=Product';
     if (path.startsWith('http')) return path;
@@ -1365,7 +1390,8 @@ export default function Cart() {
     return {
       ...item, name: product.name, category: product.category?.name,
       image: formatImg(product.image), unitPrice: variant?.price || product.price,
-      label: variant?.label || 'Standard'
+      label: variant?.label || 'Standard',
+      variants: product.variants
     };
   });
 
@@ -1595,7 +1621,20 @@ export default function Cart() {
                     <div className="cart-item-info">
                       <p className="cart-item-cat">{item.category}</p>
                       <p className="cart-item-name">{item.name}</p>
-                      <p className="cart-item-sub">{item.label} · ₹{item.unitPrice?.toLocaleString('en-IN')} per unit</p>
+                      {item.variants && item.variants.length > 1 ? (
+                        <select 
+                          className="cart-item-sub" 
+                          style={{ padding: '4px 8px', borderRadius: '4px', border: '1px solid #e0e0e0', background: 'transparent', outline: 'none', cursor: 'pointer', fontFamily: "'Playfair Display', serif", marginBottom: '16px', display: 'inline-block', width: 'fit-content' }}
+                          value={item.variant_id} 
+                          onChange={(e) => updateVariant(item.id, item.variant_id, parseInt(e.target.value))}
+                        >
+                          {item.variants.map(v => (
+                            <option key={v.id} value={v.id}>{v.label} · ₹{v.price.toLocaleString('en-IN')}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <p className="cart-item-sub">{item.label} · ₹{item.unitPrice?.toLocaleString('en-IN')} per unit</p>
+                      )}
                       <button className="cart-item-remove" onClick={() => removeItem(item.id, item.variant_id)}>Remove</button>
                     </div>
                     <div className="qty-control">

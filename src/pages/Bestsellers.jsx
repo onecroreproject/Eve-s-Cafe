@@ -213,7 +213,6 @@ const css = `
     display: flex;
     flex-direction: column;
     background: #fff;
-    overflow: hidden;
     height: 100%;
     text-decoration: none;
     position: relative;
@@ -235,6 +234,7 @@ const css = `
     background: ${SAGE};
     overflow: hidden;
     flex-shrink: 0;
+    border-radius: 11px 11px 0 0;
   }
   .p-img img {
     position: absolute; inset: 0;
@@ -402,6 +402,7 @@ const Bestsellers = () => {
   });
 
   const [toast, setToast] = useState({ show: false, message: '' });
+  const [selectingPackFor, setSelectingPackFor] = useState(null);
 
   // ── Helpers ──────────────────────────────────────────────────────
   const formatImg = (path) => {
@@ -437,15 +438,33 @@ const Bestsellers = () => {
     });
   };
 
-  const addToCart = (product, e) => {
+  const handleAddToCartClick = (product, e) => {
     if (e) e.stopPropagation();
-    const variant = product.variants?.[0] || {};
+    if (product.variants && product.variants.length > 1) {
+      if (selectingPackFor === product.id) {
+        setSelectingPackFor(null);
+      } else {
+        setSelectingPackFor(product.id);
+      }
+    } else {
+      addToCart(product, product.variants?.[0] || {});
+    }
+  };
+
+  const handlePackSelect = (product, variantId, e) => {
+    if (e) e.stopPropagation();
+    const variant = product.variants.find(v => v.id === parseInt(variantId)) || product.variants[0];
+    addToCart(product, variant);
+    setSelectingPackFor(null);
+  };
+
+  const addToCart = (product, variant) => {
     const cartItem = {
       id: product.id,
-      variant_id: variant.id,
+      variant_id: variant?.id,
       quantity: 1,
       name: product.name,
-      price: variant.price || product.price,
+      price: variant?.price || product.price,
       image: product.image,
     };
     const savedCart = localStorage.getItem('cartItems');
@@ -598,7 +617,7 @@ const Bestsellers = () => {
           ) : (
             <div className="p-grid">
               {bestsellers.map((product, index) => (
-                <div key={product.id} className="p-card-wrapper rv" style={{ transitionDelay: `${index * 0.05}s` }}>
+                <div key={product.id} className="p-card-wrapper rv" style={{ transitionDelay: `${index * 0.05}s`, position: 'relative', zIndex: selectingPackFor === product.id ? 50 : 1 }}>
                   <div className="p-card">
 
                     {/* Image */}
@@ -656,10 +675,49 @@ const Bestsellers = () => {
                             </span>
                           )}
                         </div>
-                        <button className="p-cart" onClick={(e) => addToCart(product, e)}>
+                        <button className="p-cart" onClick={(e) => handleAddToCartClick(product, e)}>
                           Add to Cart
                         </button>
                       </div>
+
+                      {selectingPackFor === product.id && (
+                        <div style={{
+                          position: 'absolute',
+                          top: '100%',
+                          left: '-1px',
+                          right: '-1px',
+                          background: '#fff',
+                          border: '1px solid #f0f0f0',
+                          borderTop: 'none',
+                          borderRadius: '0 0 12px 12px',
+                          boxShadow: '0 20px 40px rgba(26,60,46,0.12)',
+                          padding: '14px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '8px',
+                          zIndex: 100,
+                          cursor: 'default'
+                        }} onClick={e => e.stopPropagation()}>
+                          <div style={{ fontSize: '0.7rem', fontWeight: 600, color: '#999', textTransform: 'uppercase', letterSpacing: '1px' }}>Select Pack:</div>
+                          {product.variants.map(v => (
+                            <button
+                              key={v.id}
+                              onClick={(e) => handlePackSelect(product, v.id, e)}
+                              style={{ 
+                                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                padding: '8px 12px', border: '1px solid #f0f0f0', borderRadius: '6px',
+                                background: SAGE, cursor: 'pointer', transition: 'all 0.2s',
+                                fontSize: '0.85rem', fontFamily: "'Playfair Display', serif", color: G
+                              }}
+                              onMouseOver={e => e.currentTarget.style.borderColor = G}
+                              onMouseOut={e => e.currentTarget.style.borderColor = '#f0f0f0'}
+                            >
+                              <span style={{ fontWeight: 600 }}>{v.label}</span>
+                              <span style={{ fontWeight: 700, color: A }}>₹{v.price.toLocaleString('en-IN')}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                   </div>
@@ -669,6 +727,8 @@ const Bestsellers = () => {
           )}
         </div>
       </div>
+
+
 
       {/* Toast */}
       <div className={`toast ${toast.show ? 'show' : ''}`}>{toast.message}</div>
