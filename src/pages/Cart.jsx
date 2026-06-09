@@ -1265,8 +1265,13 @@ export default function Cart() {
         }
       }
     } else if (currentStep === 'payment') {
-      if (payMethod === 'payu') initiatePayUPayment();
-      else alert('Order Placed Successfully!');
+      if (payMethod === 'payu') {
+        initiatePayUPayment();
+      } else if (payMethod === 'cod') {
+        initiateCODPayment();
+      } else {
+        alert('This payment method is not configured yet.');
+      }
     }
   };
 
@@ -1302,6 +1307,36 @@ export default function Cart() {
     } catch (err) {
       console.error("PayU Error:", err);
       alert("Failed to initiate payment. Please try again.");
+    }
+  };
+
+  const initiateCODPayment = async () => {
+    setLoading(true);
+    try {
+      const res = await api.post('/payment/cod', {
+        amount: total,
+        firstname: shipData.name,
+        email: shipData.email,
+        phone: shipData.phone,
+        address: shipData.address,
+        city: shipData.city,
+        pincode: shipData.zip,
+        cartItems: enrichedItems,
+        address_id: shipData.address_id
+      });
+      if (res.data.success) {
+        setCartItems([]);
+        localStorage.removeItem('cartItems');
+        window.dispatchEvent(new Event('cart-updated'));
+        navigate(`/thank-you?status=success&txnid=${res.data.txnid}`);
+      } else {
+        alert(res.data.message || "Failed to place order.");
+      }
+    } catch (err) {
+      console.error("COD Error:", err);
+      alert("Failed to place Cash on Delivery order. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
