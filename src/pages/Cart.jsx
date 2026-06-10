@@ -1435,8 +1435,12 @@ export default function Cart() {
     if (!product) return { ...item, image: formatImg(item.image), unitPrice: item.price };
     const variant = product.variants?.find(v => v.id === item.variant_id) || product.variants?.[0];
     return {
-      ...item, name: product.name, category: product.category?.name,
-      image: formatImg(product.image), unitPrice: variant?.price || product.price,
+      ...item, 
+      variant_id: variant?.id || item.variant_id,
+      name: product.name, 
+      category: product.category?.name,
+      image: formatImg(product.image), 
+      unitPrice: variant?.price || product.price,
       label: variant?.label || 'Standard',
       variants: product.variants
     };
