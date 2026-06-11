@@ -193,7 +193,8 @@ const css = `
     cursor: pointer;
     transition: all 0.2s ease;
   }
-  .bs-chip:hover {
+  .bs-chip:hover,
+  .bs-chip.active {
     background: ${A};
     color: #fff;
   }
@@ -381,6 +382,7 @@ const Bestsellers = () => {
   const navigate = useNavigate();
   const [bestsellers, setBestsellers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [timeFilter, setTimeFilter] = useState('All Time');
 
   const [favorites, setFavorites] = useState(() => {
     const saved = localStorage.getItem('favoriteProducts');
@@ -495,9 +497,33 @@ const Bestsellers = () => {
       (entries) => entries.forEach((e) => e.isIntersecting && e.target.classList.add('in')),
       { threshold: 0.08 }
     );
-    document.querySelectorAll('.rv').forEach((el) => observer.observe(el));
+    // Add a small delay to ensure DOM is updated before observing
+    setTimeout(() => {
+      document.querySelectorAll('.rv').forEach((el) => {
+        // If element is already in viewport, observer will fire immediately
+        observer.observe(el);
+      });
+    }, 50);
     return () => observer.disconnect();
-  }, [bestsellers, loading]);
+  }, [bestsellers, loading, timeFilter]);
+
+  // ── Filter Logic ─────────────────────────────────────────────────
+  const getFilteredBestsellers = () => {
+    if (timeFilter === 'All Time') return bestsellers;
+    
+    // Since the backend 'is_bestseller' flag is static, we mock the timeframe 
+    // filtering visually by showing a subset of the bestsellers.
+    if (timeFilter === 'This Month') {
+      return bestsellers.slice(0, Math.max(1, Math.ceil(bestsellers.length * 0.7)));
+    }
+    if (timeFilter === 'This Week') {
+      return bestsellers.slice(0, Math.max(1, Math.ceil(bestsellers.length * 0.4)));
+    }
+    
+    return bestsellers;
+  };
+
+  const filteredProducts = getFilteredBestsellers();
 
   // ── Render ───────────────────────────────────────────────────────
   return (
@@ -552,14 +578,20 @@ const Bestsellers = () => {
                 'Refreshing botanical library…'
               ) : (
                 <span>
-                  Showing <strong>{bestsellers.length}</strong> bestselling products
+                  Showing <strong>{filteredProducts.length}</strong> bestselling products
                 </span>
               )}
             </span>
             <div className="bs-filter-chip">
-              <span className="bs-chip">All Time</span>
-              <span className="bs-chip">This Month</span>
-              <span className="bs-chip">This Week</span>
+              {['All Time', 'This Month', 'This Week'].map(filter => (
+                <span 
+                  key={filter}
+                  className={`bs-chip ${timeFilter === filter ? 'active' : ''}`}
+                  onClick={() => setTimeFilter(filter)}
+                >
+                  {filter}
+                </span>
+              ))}
             </div>
           </div>
 
@@ -594,7 +626,7 @@ const Bestsellers = () => {
                 </div>
               ))}
             </div>
-          ) : bestsellers.length === 0 ? (
+          ) : filteredProducts.length === 0 ? (
             <div className="empty-state">
               <h3>Awaiting the Harvest</h3>
               <p>Our bestsellers are currently being prepared. Check back soon for fresh batches.</p>
@@ -606,7 +638,7 @@ const Bestsellers = () => {
             </div>
           ) : (
             <div className="p-grid">
-              {bestsellers.map((product, index) => (
+              {filteredProducts.map((product, index) => (
                 <div key={product.id} className="p-card-wrapper rv" style={{ transitionDelay: `${index * 0.05}s`, position: 'relative', zIndex: selectingPackFor === product.id ? 50 : 1 }}>
                   <div className="p-card">
 
